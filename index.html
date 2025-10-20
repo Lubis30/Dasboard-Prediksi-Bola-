@@ -237,6 +237,7 @@
             position: relative;
             overflow: hidden;
             text-align: center;
+            cursor: pointer;
         }
 
         .dashboard-card::before {
@@ -662,92 +663,26 @@
             100% { opacity: 1; transform: scale(1.2); }
         }
 
-        /* Red Theme Styles */
-        .red-theme {
-            background: linear-gradient(135deg, #1a0f0f 0%, #2a1a1a 50%, #8b0000 100%);
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 15px 25px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            z-index: 1001;
+            transform: translateX(150%);
+            transition: transform 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
-        .red-theme .section {
-            background: rgba(42, 26, 26, 0.8);
-            border: 1px solid rgba(239, 68, 68, 0.2);
-        }
-
-        .red-theme .section::before {
-            background: linear-gradient(90deg, var(--red-primary), var(--red-light), var(--red-primary));
-        }
-
-        .red-theme .section h2 {
-            background: linear-gradient(135deg, var(--red-primary), var(--red-light));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .red-theme .form-container, 
-        .red-theme .conversion-container {
-            border: 1px solid rgba(239, 68, 68, 0.3);
-        }
-
-        .red-theme .form-container::before, 
-        .red-theme .conversion-container::before {
-            background: radial-gradient(circle at 30% 20%, var(--red-glow) 0%, transparent 50%);
-        }
-
-        .red-theme textarea {
-            border: 2px solid rgba(239, 68, 68, 0.3);
-        }
-
-        .red-theme textarea:focus {
-            border-color: var(--red-primary);
-            box-shadow: 0 0 20px var(--red-glow);
-        }
-
-        .red-theme .output, 
-        .red-theme .conversion-result {
-            border: 1px solid rgba(239, 68, 68, 0.3);
-        }
-
-        .red-theme .prediction-table {
-            background: linear-gradient(135deg, #1a0f0f, #2a1a1a);
-        }
-
-        .red-theme .prediction-table::before {
-            background: linear-gradient(45deg, transparent 30%, var(--red-glow) 50%, transparent 70%);
-        }
-
-        .red-theme .prediction-table th {
-            background: linear-gradient(135deg, var(--red-primary), var(--red-dark));
-            border-bottom: 3px solid var(--red-light);
-        }
-
-        .red-theme .prediction-table th::after,
-        .red-theme .prediction-table th::before {
-            content: '★';
-            color: var(--red-accent);
-        }
-
-        .red-theme .prediction-table tr:hover td {
-            background: rgba(239, 68, 68, 0.1);
-            color: var(--red-light);
-        }
-
-        .red-theme .prediction-table .match-cell {
-            color: var(--red-light);
-        }
-
-        .red-theme .league-header {
-            background: linear-gradient(135deg, var(--red-dark), #1a0f0f) !important;
-            color: var(--red-accent) !important;
-        }
-
-        .red-theme .marquee {
-            background: linear-gradient(90deg, #1a0f0f, var(--red-primary), #1a0f0f);
-            box-shadow: 0 5px 15px var(--red-glow);
-        }
-
-        .red-theme .date {
-            color: var(--red-light);
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid rgba(239, 68, 68, 0.3);
+        .notification.show {
+            transform: translateX(0);
         }
 
         /* Responsive Design */
@@ -837,6 +772,12 @@
     <div class="floating-element" style="bottom: 15%; left: 15%; animation-delay: 4s;"></div>
     <div class="floating-element" style="bottom: 25%; right: 5%; animation-delay: 1s;"></div>
 
+    <!-- Notification -->
+    <div class="notification" id="notification">
+        <i class="fas fa-check-circle"></i>
+        <span id="notification-text">Operasi berhasil!</span>
+    </div>
+
     <!-- Sidebar Menu -->
     <div class="sidebar">
         <div class="logo">
@@ -856,7 +797,7 @@
     <div class="content">
         <!-- Dashboard Section Mewah -->
         <section id="dashboard" class="dashboard-section">
-            <h2>Selamat Datang di Emerald Dashboard</h2>
+            <h2>Dashboard Prediksi Bola SiLubis</h2>
             <p>Dashboard mewah dengan tema hijau toska yang elegan untuk mengelola berbagai kebutuhan prediksi dan konversi data sepak bola. Nikmati pengalaman premium dengan fitur-fitur canggih dan desain yang memukau.</p>
             
             <div class="dashboard-stats">
@@ -883,17 +824,17 @@
             </div>
 
             <div class="dashboard-cards">
-                <div class="dashboard-card">
+                <div class="dashboard-card" onclick="showSection('prediksiBola')">
                     <i class="fas fa-futbol"></i>
                     <h3>Prediksi Bola Akurat</h3>
                     <p>Dapatkan prediksi bola dengan akurasi tinggi untuk berbagai liga sepak bola di seluruh dunia. Analisis mendalam dengan data terkini.</p>
                 </div>
-                <div class="dashboard-card">
+                <div class="dashboard-card" onclick="showSection('pengisianTeks')">
                     <i class="fas fa-edit"></i>
                     <h3>Pengisian Teks Otomatis</h3>
                     <p>Format jadwal pertandingan dengan cepat dan mudah. Hasil yang elegan dan siap untuk berbagai keperluan.</p>
                 </div>
-                <div class="dashboard-card">
+                <div class="dashboard-card" onclick="showSection('konversiSkor')">
                     <i class="fas fa-exchange-alt"></i>
                     <h3>Konversi Skor Cepat</h3>
                     <p>Ubah format skor pertandingan dengan satu klik. Mendukung berbagai format input dan output.</p>
@@ -981,6 +922,19 @@ FRANCE LIGUE 2
     </div>
 
     <script>
+        // Fungsi untuk menampilkan notifikasi
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            const notificationText = document.getElementById('notification-text');
+            
+            notificationText.textContent = message;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
         // Fungsi untuk menampilkan section
         function showSection(sectionId) {
             // Sembunyikan semua section
@@ -995,7 +949,18 @@ FRANCE LIGUE 2
             document.querySelectorAll('.menu-item').forEach(item => {
                 item.classList.remove('active');
             });
-            event.currentTarget.classList.add('active');
+            
+            // Set menu aktif berdasarkan section yang ditampilkan
+            const menuItems = document.querySelectorAll('.menu-item');
+            if (sectionId === 'dashboard') {
+                menuItems[0].classList.add('active');
+            } else if (sectionId === 'prediksiBola') {
+                menuItems[1].classList.add('active');
+            } else if (sectionId === 'pengisianTeks') {
+                menuItems[2].classList.add('active');
+            } else if (sectionId === 'konversiSkor') {
+                menuItems[3].classList.add('active');
+            }
         }
 
         // Tampilkan dashboard secara default
@@ -1005,7 +970,7 @@ FRANCE LIGUE 2
         function generateTable() {
             let input = document.getElementById("inputData").value.trim();
             if (input === "") {
-                alert("Harap masukkan data prediksi!");
+                showNotification("Harap masukkan data prediksi!");
                 return;
             }
             
@@ -1049,6 +1014,7 @@ FRANCE LIGUE 2
 
             tableHtml += "</tbody></table>";
             document.getElementById("outputTable").innerHTML = tableHtml;
+            showNotification("Tabel prediksi berhasil digenerate!");
         }
 
         // Fungsi untuk menampilkan kode HTML dengan tema hijau
@@ -1065,6 +1031,11 @@ FRANCE LIGUE 2
             const formattedDate = `${dayOfWeek}, ${day} ${month} ${year}`;
 
             let tableContent = document.getElementById("outputTable").innerHTML;
+            
+            if (!tableContent) {
+                showNotification("Harap generate tabel terlebih dahulu!");
+                return;
+            }
             
             // CSS untuk HTML yang dihasilkan
             const generatedCSS = `
@@ -1252,6 +1223,8 @@ body {
     ${tableContent}
 </body>
 </html>`;
+            
+            showNotification("Kode HTML tema hijau berhasil dibuat!");
         }
 
         // Fungsi untuk menampilkan kode HTML dengan tema merah dan bintang
@@ -1268,6 +1241,11 @@ body {
             const formattedDate = `${dayOfWeek}, ${day} ${month} ${year}`;
 
             let tableContent = document.getElementById("outputTable").innerHTML;
+            
+            if (!tableContent) {
+                showNotification("Harap generate tabel terlebih dahulu!");
+                return;
+            }
             
             // CSS untuk HTML yang dihasilkan dengan tema merah
             const generatedCSS = `
@@ -1483,13 +1461,21 @@ body {
     ${tableContent}
 </body>
 </html>`;
+            
+            showNotification("Kode HTML tema merah berhasil dibuat!");
         }
 
         // Fungsi untuk copy kode HTML
         function copyHtmlCode() {
             let htmlContent = document.getElementById("htmlCode").textContent;
+            
+            if (!htmlContent) {
+                showNotification("Tidak ada kode HTML untuk disalin!");
+                return;
+            }
+            
             navigator.clipboard.writeText(htmlContent).then(function() {
-                alert("HTML Tabel telah disalin!");
+                showNotification("HTML Tabel telah disalin!");
             }, function() {
                 alert("Gagal menyalin HTML. Silakan coba lagi.");
             });
@@ -1499,7 +1485,7 @@ body {
         function prosesInput() {
             var input = document.getElementById('jadwalInput').value.trim();
             if (input === "") {
-                alert("Harap lengkapi kolom input!");
+                showNotification("Harap lengkapi kolom input!");
                 return;
             }
             var ligaArray = input.split(/\n{2,}/);
@@ -1517,6 +1503,7 @@ body {
                 outputHTML += `</div>`;
             });
             document.getElementById('output').innerHTML = outputHTML;
+            showNotification("Jadwal berhasil diproses!");
         }
 
         // Fungsi untuk copy ke clipboard
@@ -1524,7 +1511,7 @@ body {
             var result = document.getElementById('output').innerText;
             if (result && result.trim() !== "") {
                 navigator.clipboard.writeText(result).then(function() {
-                    alert("Hasil berhasil disalin!");
+                    showNotification("Hasil berhasil disalin!");
                 }, function() {
                     var textarea = document.createElement('textarea');
                     textarea.value = result;
@@ -1532,10 +1519,10 @@ body {
                     textarea.select();
                     document.execCommand('copy');
                     document.body.removeChild(textarea);
-                    alert("Hasil berhasil disalin!");
+                    showNotification("Hasil berhasil disalin!");
                 });
             } else {
-                alert("Tidak ada hasil untuk disalin.");
+                showNotification("Tidak ada hasil untuk disalin.");
             }
         }
 
@@ -1543,12 +1530,13 @@ body {
         function konversiSkor() {
             let input = document.getElementById("inputSkor").value.trim();
             if (input === "") {
-                alert("Harap masukkan data pertandingan!");
+                showNotification("Harap masukkan data pertandingan!");
                 return;
             }
             
             let hasil = input.replace(/(\d+)\s*–\s*(\d+)/g, "$1 : $2");
             document.getElementById("hasilKonversi").textContent = hasil;
+            showNotification("Skor berhasil dikonversi!");
         }
 
         // Fungsi untuk copy hasil konversi
@@ -1556,7 +1544,7 @@ body {
             let hasil = document.getElementById("hasilKonversi").textContent;
             if (hasil && hasil.trim() !== "") {
                 navigator.clipboard.writeText(hasil).then(function() {
-                    alert("Hasil konversi berhasil disalin!");
+                    showNotification("Hasil konversi berhasil disalin!");
                 }, function() {
                     var textarea = document.createElement('textarea');
                     textarea.value = hasil;
@@ -1564,10 +1552,10 @@ body {
                     textarea.select();
                     document.execCommand('copy');
                     document.body.removeChild(textarea);
-                    alert("Hasil konversi berhasil disalin!");
+                    showNotification("Hasil konversi berhasil disalin!");
                 });
             } else {
-                alert("Tidak ada hasil untuk disalin.");
+                showNotification("Tidak ada hasil untuk disalin.");
             }
         }
 
@@ -1575,6 +1563,7 @@ body {
         function clearConversion() {
             document.getElementById("inputSkor").value = "";
             document.getElementById("hasilKonversi").textContent = "";
+            showNotification("Input berhasil dihapus!");
         }
     </script>
 </body>
