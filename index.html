@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Utama</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #10b981;
+            --primary-dark: #059669;
+            --primary-light: #34d399;
+            --primary-glow: rgba(16, 185, 129, 0.3);
+            --secondary: #0f172a;
+            --secondary-light: #1e293b;
+            --accent: #fbbf24;
+            --text: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --shadow: 0 8px 30px rgba(16, 185, 129, 0.15);
+            --radius: 16px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0d9488 100%);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Sidebar Mewah */
+        .sidebar {
+            width: 280px;
+            height: 100vh;
+            background: linear-gradient(180deg, var(--secondary) 0%, var(--secondary-light) 100%);
+            position: fixed;
+            top: 0;
+            left: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 40px;
+            box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3);
+            border-right: 1px solid var(--primary-glow);
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent 30%, var(--primary-glow) 50%, transparent 70%);
+            opacity: 0.1;
+            animation: shine 8s infinite linear;
+        }
+
+        @keyframes shine {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 50px;
+            position: relative;
+        }
+
+        .logo h2 {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 5px 15px var(--primary-glow);
+        }
+
+        .logo::after {
+            content: '';
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+        }
+
+        .sidebar nav {
+            width: 100%;
+            padding: 0 20px;
+        }
+
+        .sidebar nav ul {
+            list-style: none;
+            width: 100%;
+        }
+
+        .sidebar nav ul li {
+            margin-bottom: 8px;
+            position: relative;
+        }
+
+        .menu-item {
+            color: var(--text);
+            text-decoration: none;
+            font-size: 16px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .menu-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, var(--primary-glow), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .menu-item:hover::before {
+            left: 100%;
+        }
+
+        .menu-item:hover {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--primary-light);
+            transform: translateX(10px);
+            box-shadow: 0 5px 15px var(--primary-glow);
+        }
+
+        .menu-item.active {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            box-shadow: 0 5px 20px var(--primary-glow);
+        }
+
+        .menu-item i {
+            margin-right: 15px;
+            font-size: 18px;
+            width: 24px;
+            text-align: center;
+        }
+
+        /* Content Area */
+        .content {
+            margin-left: 280px;
+            padding: 30px;
+            min-height: 100vh;
+            transition: margin-left 0.3s ease;
+        }
+
+        .section {
+            background: rgba(30, 41, 59, 0.8);
+            backdrop-filter: blur(20px);
+            padding: 30px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 30px;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--primary-light), var(--primary));
+        }
+
+        .section h2 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .section p {
+            color: var(--text-secondary);
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+
+        /* Form Container Mewah */
+        .form-container, .conversion-container {
+            background: rgba(15, 23, 42, 0.9);
+            padding: 30px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            margin: 20px 0;
+            position: relative;
+        }
+
+        .form-container::before, .conversion-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 30% 20%, var(--primary-glow) 0%, transparent 50%);
+            opacity: 0.1;
+            pointer-events: none;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 20px;
+            background: rgba(30, 41, 59, 0.8);
+            border: 2px solid rgba(16, 185, 129, 0.3);
+            border-radius: 12px;
+            color: var(--text);
+            font-size: 16px;
+            resize: vertical;
+            transition: all 0.3s ease;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 20px var(--primary-glow);
+            background: rgba(30, 41, 59, 0.9);
+        }
+
+        /* Button Styles */
+        .btn {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 5px 15px var(--primary-glow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px var(--primary-glow);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, var(--primary-light), var(--primary));
+        }
+
+        .btn-accent {
+            background: linear-gradient(135deg, var(--accent), #f59e0b);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+
+        /* Table Styles */
+        .prediction-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            border-radius: var(--radius);
+            overflow: hidden;
+            background: linear-gradient(135deg, var(--secondary), var(--secondary-light));
+            font-size: 14px;
+            position: relative;
+        }
+
+        .prediction-table::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent 30%, var(--primary-glow) 50%, transparent 70%);
+            opacity: 0.1;
+            pointer-events: none;
+        }
+
+        .prediction-table th {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            text-align: center;
+            padding: 18px 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 3px solid var(--primary-light);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .prediction-table th::after {
+            content: '⚽';
+            position: absolute;
+            top: 50%;
+            left: 10px;
+            transform: translateY(-50%);
+            color: var(--accent);
+            animation: bounce 2s infinite;
+            font-size: 12px;
+        }
+
+        .prediction-table th::before {
+            content: '⚽';
+            position: absolute;
+            top: 50%;
+            right: 10px;
+            transform: translateY(-50%);
+            color: var(--accent);
+            animation: bounce 2s infinite 1s;
+            font-size: 12px;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(-50%) scale(1); }
+            50% { transform: translateY(-50%) scale(1.2); }
+        }
+
+        .prediction-table td {
+            text-align: center;
+            padding: 15px 12px;
+            color: var(--text);
+            border-bottom: 1px solid rgba(16, 185, 129, 0.2);
+            background: rgba(30, 41, 59, 0.8);
+            transition: all 0.3s ease;
+        }
+
+        .prediction-table tr:nth-child(even) td {
+            background: rgba(15, 23, 42, 0.8);
+        }
+
+        .prediction-table tr:hover td {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--primary-light);
+            transform: scale(1.02);
+        }
+
+        .prediction-table .match-cell {
+            position: relative;
+            font-weight: 500;
+            color: var(--primary-light);
+        }
+
+        .league-header {
+            background: linear-gradient(135deg, var(--primary-dark), var(--secondary)) !important;
+            color: var(--accent) !important;
+            font-size: 18px !important;
+            text-align: center;
+            padding: 20px !important;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Marquee */
+        .marquee {
+            overflow: hidden;
+            white-space: nowrap;
+            background: linear-gradient(90deg, var(--secondary), var(--primary), var(--secondary));
+            color: white;
+            padding: 15px 0;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 50px;
+            margin: 25px 0;
+            box-shadow: 0 5px 15px var(--primary-glow);
+        }
+
+        .marquee p {
+            display: inline-block;
+            animation: marquee 20s linear infinite;
+            padding-left: 100%;
+        }
+
+        @keyframes marquee {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-100%); }
+        }
+
+        /* Date Display */
+        .date {
+            text-align: center;
+            font-size: 18px;
+            color: var(--primary-light);
+            margin: 20px 0;
+            font-weight: 600;
+            background: rgba(16, 185, 129, 0.1);
+            padding: 15px;
+            border-radius: var(--radius);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        /* Output Areas */
+        .output, .conversion-result {
+            margin-top: 25px;
+            padding: 25px;
+            background: rgba(15, 23, 42, 0.9);
+            border-radius: var(--radius);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: var(--text);
+            max-height: 500px;
+            overflow-y: auto;
+            box-shadow: var(--shadow);
+        }
+
+        /* Floating Elements */
+        .floating-element {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, var(--primary-glow) 0%, transparent 70%);
+            border-radius: 50%;
+            filter: blur(20px);
+            opacity: 0.3;
+            animation: float 6s ease-in-out infinite;
+            z-index: -1;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 250px;
+            }
+            .content {
+                margin-left: 250px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 80px;
+                padding-top: 30px;
+            }
+            .sidebar .logo h2 {
+                font-size: 0;
+            }
+            .sidebar .logo::after {
+                width: 30px;
+            }
+            .sidebar .menu-item span {
+                display: none;
+            }
+            .sidebar .menu-item i {
+                margin-right: 0;
+                font-size: 20px;
+            }
+            .content {
+                margin-left: 80px;
+                padding: 20px;
+            }
+            .section {
+                padding: 20px;
+            }
+            .btn-group {
+                flex-direction: column;
+            }
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+                padding: 15px;
+            }
+            .sidebar nav ul {
+                display: flex;
+                justify-content: space-around;
+            }
+            .sidebar nav ul li {
+                margin-bottom: 0;
+            }
+            .menu-item {
+                flex-direction: column;
+                padding: 10px;
+                font-size: 12px;
+            }
+            .menu-item span {
+                display: block;
+                margin-top: 5px;
+            }
+            .content {
+                margin-left: 0;
+                padding: 15px;
+            }
+            .section {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating Background Elements -->
+    <div class="floating-element" style="top: 10%; left: 5%;"></div>
+    <div class="floating-element" style="top: 20%; right: 10%; animation-delay: 2s;"></div>
+    <div class="floating-element" style="bottom: 15%; left: 15%; animation-delay: 4s;"></div>
+    <div class="floating-element" style="bottom: 25%; right: 5%; animation-delay: 1s;"></div>
+
+    <!-- Sidebar Menu -->
+    <div class="sidebar">
+        <div class="logo">
+            <h2>Emerald Dashboard</h2>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="#" class="menu-item active" onclick="showSection('dashboard')"><i class="fas fa-tachometer-alt"></i> <span>Dashboard</span></a></li>
+                <li><a href="#" class="menu-item" onclick="showSection('prediksiBola')"><i class="fas fa-futbol"></i> <span>Prediksi Bola</span></a></li>
+                <li><a href="#" class="menu-item" onclick="showSection('pengisianTeks')"><i class="fas fa-edit"></i> <span>Pengisian Teks</span></a></li>
+                <li><a href="#" class="menu-item" onclick="showSection('konversiSkor')"><i class="fas fa-exchange-alt"></i> <span>Konversi Skor</span></a></li>
+            </ul>
+        </nav>
+    </div>
+
+    <!-- Content Area -->
+    <div class="content">
+        <!-- Dashboard Section -->
+        <section id="dashboard" class="section">
+            <h2>Selamat Datang di Lubis Dashboard</h2>
+            <p>Dashboard mewah dengan tema hijau toska yang elegan untuk mengelola berbagai kebutuhan prediksi dan konversi data sepak bola.</p>
+            <div class="btn-group">
+                <button class="btn" onclick="showSection('prediksiBola')"><i class="fas fa-futbol"></i> Prediksi Bola</button>
+                <button class="btn" onclick="showSection('pengisianTeks')"><i class="fas fa-edit"></i> Pengisian Teks</button>
+                <button class="btn" onclick="showSection('konversiSkor')"><i class="fas fa-exchange-alt"></i> Konversi Skor</button>
+            </div>
+        </section>
+
+        <!-- Prediksi Bola Section -->
+        <section id="prediksiBola" class="section" style="display:none;">
+            <h2>Prediksi Bola Mewah</h2>
+            <p>Generate tabel prediksi bola yang elegan dengan tema hijau toska.</p>
+            
+            <div class="marquee">
+                <p>⚽ PREDIKSI BOLA TERUPDATE! Daftar di ANGKABET dan nikmati pengalaman taruhan premium! ⚽</p>
+            </div>
+
+            <div class="form-container">
+                <textarea id="inputData" placeholder="Contoh format:
+Liga Inggris
+01/01 20:00 WIB Manchester United VS Liverpool 2 : 1
+02/01 18:30 WIB Chelsea VS Arsenal 1 : 1
+
+Liga Spanyol
+03/01 22:00 WIB Barcelona VS Real Madrid 3 : 2" rows="8"></textarea>
+                
+                <div class="btn-group">
+                    <button class="btn" onclick="generateTable()"><i class="fas fa-table"></i> Generate Tabel</button>
+                    <button class="btn btn-secondary" onclick="showHtmlCode()"><i class="fas fa-code"></i> Tampilkan HTML</button>
+                    <button class="btn btn-accent" onclick="copyHtmlCode()"><i class="fas fa-copy"></i> Copy HTML</button>
+                </div>
+            </div>
+
+            <div id="outputTable" class="output"></div>
+            <pre id="htmlCode" style="display:none; background:var(--secondary); color:var(--text); padding:20px; border-radius:var(--radius); overflow:auto; margin-top:20px;"></pre>
+        </section>
+
+        <!-- Pengisian Teks Section -->
+        <section id="pengisianTeks" class="section" style="display:none;">
+            <h2>Pengisian Teks Premium</h2>
+            <p>Format jadwal pertandingan dengan gaya yang elegan dan profesional.</p>
+
+            <div class="form-container">
+                <label style="color:var(--text); display:block; margin-bottom:15px; font-weight:600;">Masukkan Jadwal Pertandingan:</label>
+                <textarea id="jadwalInput" placeholder="Masukkan jadwal pertandingan (pisahkan liga dan pertandingan dengan baris kosong)" rows="6"></textarea>
+                
+                <div class="btn-group">
+                    <button class="btn" onclick="prosesInput()"><i class="fas fa-magic"></i> Proses Jadwal</button>
+                    <button class="btn btn-accent" onclick="copyToClipboard()"><i class="fas fa-copy"></i> Salin Hasil</button>
+                </div>
+            </div>
+
+            <div id="output" class="output"></div>
+        </section>
+
+        <!-- Konversi Skor Section -->
+        <section id="konversiSkor" class="section" style="display:none;">
+            <h2>Konversi Skor Elegant</h2>
+            <p>Ubah format skor pertandingan dengan cepat dan mudah.</p>
+
+            <div class="conversion-container">
+                <label style="color:var(--text); display:block; margin-bottom:15px; font-weight:600;">Masukkan Data Pertandingan:</label>
+                <textarea id="inputSkor" placeholder="Contoh format:
+FRANCE LIGUE 2
+
+07/12 02:00 WIB [3] Lorient VS [16] Troyes 1 – 0
+
+07/12 02:00 WIB [18] FC Martigues VS [6] Guingamp 1 – 2" rows="6"></textarea>
+                
+                <div class="btn-group">
+                    <button class="btn" onclick="konversiSkor()"><i class="fas fa-sync-alt"></i> Konversi Skor</button>
+                    <button class="btn btn-accent" onclick="copyConvertedResult()"><i class="fas fa-copy"></i> Salin Hasil</button>
+                    <button class="btn btn-secondary" onclick="clearConversion()"><i class="fas fa-broom"></i> Hapus</button>
+                </div>
+            </div>
+
+            <div id="hasilKonversi" class="conversion-result"></div>
+        </section>
+    </div>
+
+    <script>
+        // Fungsi untuk menampilkan section
+        function showSection(sectionId) {
+            // Sembunyikan semua section
+            document.querySelectorAll('.section').forEach(section => {
+                section.style.display = 'none';
+            });
+
+            // Tampilkan section yang dipilih
+            document.getElementById(sectionId).style.display = 'block';
+
+            // Update menu aktif
+            document.querySelectorAll('.menu-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+        }
+
+        // Tampilkan dashboard secara default
+        showSection('dashboard');
+
+        // Fungsi untuk generate tabel prediksi
+        function generateTable() {
+            let input = document.getElementById("inputData").value.trim();
+            if (input === "") {
+                alert("Harap masukkan data prediksi!");
+                return;
+            }
+            
+            let lines = input.split("\n").filter(line => line.trim() !== "");
+            let tableHtml = "";
+            let currentLeague = "";
+
+            lines.forEach(line => {
+                line = line.trim();
+                if (!line.includes("VS") && !line.match(/^\d{2}\/\d{2} \d{2}:\d{2} WIB/)) {
+                    if (currentLeague) {
+                        tableHtml += "</tbody></table>";
+                    }
+                    currentLeague = `<tr><th colspan='3' class="league-header">${line}</th></tr>`;
+                    tableHtml += `<table class="prediction-table"><tbody>${currentLeague}
+                        <tr>
+                            <th style="width:25%">Tanggal & Waktu</th>
+                            <th style="width:50%">Pertandingan</th>
+                            <th style="width:25%">Skor</th>
+                        </tr>`;
+                } else {
+                    let matchPattern = /^(\d{2}\/\d{2} \d{2}:\d{2} WIB)\s+(.+?)\s+VS\s+(.+?)\s+(\d+\s?:\s?\d+)$/i;
+                    let match = line.match(matchPattern);
+                    if (match) {
+                        let date = match[1];
+                        let team1 = match[2].trim();
+                        let team2 = match[3].trim();
+                        let score = match[4];
+                        tableHtml += `<tr>
+                            <td>${date}</td>
+                            <td class="match-cell">${team1} VS ${team2}</td>
+                            <td>${score}</td>
+                        </tr>`;
+                    } else {
+                        tableHtml += `<tr>
+                            <td colspan="3" style="color:#ef4444; background:rgba(239,68,68,0.1)">Format tidak valid: ${line}</td>
+                        </tr>`;
+                    }
+                }
+            });
+
+            tableHtml += "</tbody></table>";
+            document.getElementById("outputTable").innerHTML = tableHtml;
+        }
+
+        // Fungsi untuk menampilkan kode HTML
+        function showHtmlCode() {
+            const currentDate = new Date();
+            const daysOfWeek = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+            const monthsOfYear = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+            
+            const dayOfWeek = daysOfWeek[currentDate.getDay()];
+            const day = currentDate.getDate().toString().padStart(2, '0');
+            const month = monthsOfYear[currentDate.getMonth()];
+            const year = currentDate.getFullYear();
+            
+            const formattedDate = `${dayOfWeek}, ${day} ${month} ${year}`;
+
+            let tableContent = document.getElementById("outputTable").innerHTML;
+            
+            document.getElementById("htmlCode").style.display = "block";
+            document.getElementById("htmlCode").textContent = `
+<div class="date">${formattedDate}</div>
+${tableContent}`;
+        }
+
+        // Fungsi untuk copy kode HTML
+        function copyHtmlCode() {
+            let htmlContent = document.getElementById("htmlCode").textContent;
+            navigator.clipboard.writeText(htmlContent).then(function() {
+                alert("HTML Tabel telah disalin!");
+            }, function() {
+                alert("Gagal menyalin HTML. Silakan coba lagi.");
+            });
+        }
+
+        // Fungsi untuk memproses input jadwal
+        function prosesInput() {
+            var input = document.getElementById('jadwalInput').value.trim();
+            if (input === "") {
+                alert("Harap lengkapi kolom input!");
+                return;
+            }
+            var ligaArray = input.split(/\n{2,}/);
+            var outputHTML = '';
+            ligaArray.forEach(function(ligaText) {
+                var lines = ligaText.trim().split('\n');
+                var namaLiga = lines[0].trim();
+                var jadwal = lines.slice(1);
+                outputHTML += `<div style="color: var(--primary-light); font-weight: 600; margin: 20px 0 10px 0; font-size: 18px;">${namaLiga}</div><div style="margin-left: 20px;">`;
+                jadwal.forEach(match => {
+                    match = match.replace(/\bvs\b/gi, 'VS');
+                    match = match.replace(/(\d+)\s*-\s*(\d+)/g, '$1 : $2');
+                    outputHTML += `<div style="margin: 8px 0; color: var(--text);">${match}</div>`;
+                });
+                outputHTML += `</div>`;
+            });
+            document.getElementById('output').innerHTML = outputHTML;
+        }
+
+        // Fungsi untuk copy ke clipboard
+        function copyToClipboard() {
+            var result = document.getElementById('output').innerText;
+            if (result && result.trim() !== "") {
+                navigator.clipboard.writeText(result).then(function() {
+                    alert("Hasil berhasil disalin!");
+                }, function() {
+                    var textarea = document.createElement('textarea');
+                    textarea.value = result;
+                    document.body.appendChild(textarea);
+                    textarea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textarea);
+                    alert("Hasil berhasil disalin!");
+                });
+            } else {
+                alert("Tidak ada hasil untuk disalin.");
+            }
+        }
+
+        // Fungsi untuk konversi skor
+        function konversiSkor() {
+            let input = document.getElementById("inputSkor").value.trim();
+            if (input === "") {
+                alert("Harap masukkan data pertandingan!");
+                return;
+            }
+            
+            let hasil = input.replace(/(\d+)\s*–\s*(\d+)/g, "$1 : $2");
+            document.getElementById("hasilKonversi").textContent = hasil;
+        }
+
+        // Fungsi untuk copy hasil konversi
+        function copyConvertedResult() {
+            let hasil = document.getElementById("hasilKonversi").textContent;
+            if (hasil && hasil.trim() !== "") {
+                navigator.clipboard.writeText(hasil).then(function() {
+                    alert("Hasil konversi berhasil disalin!");
+                }, function() {
+                    var textarea = document.createElement('textarea');
+                    textarea.value = hasil;
+                    document.body.appendChild(textarea);
+                    textarea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textarea);
+                    alert("Hasil konversi berhasil disalin!");
+                });
+            } else {
+                alert("Tidak ada hasil untuk disalin.");
+            }
+        }
+
+        // Fungsi untuk menghapus input konversi
+        function clearConversion() {
+            document.getElementById("inputSkor").value = "";
+            document.getElementById("hasilKonversi").textContent = "";
+        }
+    </script>
+</body>
+</html>
