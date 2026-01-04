@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Utama</title>
+    <title>Dashboard Prediksi Bola Premium</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
@@ -26,6 +26,12 @@
             --red-light: #f87171;
             --red-glow: rgba(239, 68, 68, 0.3);
             --red-accent: #f59e0b;
+            --red-bg-dark: #1a0f0f;
+            --red-bg-medium: #2a1a1a;
+            --red-bg-light: #3a2a2a;
+            --gold: #ffd700;
+            --gold-light: #fff8dc;
+            --gold-glow: rgba(255, 215, 0, 0.4);
         }
 
         * {
@@ -480,16 +486,16 @@
             margin: 20px 0;
         }
 
-        /* Table Styles */
+        /* Table Styles - Dikecilkan tapi elegan */
         .prediction-table {
             width: 100%;
             border-collapse: collapse;
-            margin: 25px 0;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            border-radius: var(--radius);
+            margin: 20px 0;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
             overflow: hidden;
             background: linear-gradient(135deg, var(--secondary), var(--secondary-light));
-            font-size: 14px;
+            font-size: 11px;
             position: relative;
         }
 
@@ -509,49 +515,23 @@
             background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             color: white;
             text-align: center;
-            padding: 18px 12px;
+            padding: 10px 8px;
             font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            border-bottom: 3px solid var(--primary-light);
+            letter-spacing: 0.3px;
+            border-bottom: 2px solid var(--primary-light);
             position: relative;
             overflow: hidden;
-        }
-
-        .prediction-table th::after {
-            content: '⚽';
-            position: absolute;
-            top: 50%;
-            left: 10px;
-            transform: translateY(-50%);
-            color: var(--accent);
-            animation: bounce 2s infinite;
-            font-size: 12px;
-        }
-
-        .prediction-table th::before {
-            content: '⚽';
-            position: absolute;
-            top: 50%;
-            right: 10px;
-            transform: translateY(-50%);
-            color: var(--accent);
-            animation: bounce 2s infinite 1s;
-            font-size: 12px;
-        }
-
-        @keyframes bounce {
-            0%, 100% { transform: translateY(-50%) scale(1); }
-            50% { transform: translateY(-50%) scale(1.2); }
+            font-size: 10px;
         }
 
         .prediction-table td {
             text-align: center;
-            padding: 15px 12px;
+            padding: 8px 6px;
             color: var(--text);
-            border-bottom: 1px solid rgba(16, 185, 129, 0.2);
+            border-bottom: 1px solid rgba(16, 185, 129, 0.1);
             background: rgba(30, 41, 59, 0.8);
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
         }
 
         .prediction-table tr:nth-child(even) td {
@@ -561,23 +541,39 @@
         .prediction-table tr:hover td {
             background: rgba(16, 185, 129, 0.1);
             color: var(--primary-light);
-            transform: scale(1.02);
         }
 
         .prediction-table .match-cell {
             position: relative;
             font-weight: 500;
             color: var(--primary-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        /* Bintang untuk tim di dashboard */
+        .team-star {
+            color: var(--accent);
+            font-size: 9px;
+            animation: twinkle 2s infinite alternate;
+        }
+
+        @keyframes twinkle {
+            0% { opacity: 0.6; transform: scale(0.9); }
+            100% { opacity: 1; transform: scale(1.1); }
         }
 
         .league-header {
             background: linear-gradient(135deg, var(--primary-dark), var(--secondary)) !important;
             color: var(--accent) !important;
-            font-size: 18px !important;
+            font-size: 13px !important;
             text-align: center;
-            padding: 20px !important;
+            padding: 10px !important;
             position: relative;
             overflow: hidden;
+            font-weight: 600;
         }
 
         /* Marquee */
@@ -586,12 +582,12 @@
             white-space: nowrap;
             background: linear-gradient(90deg, var(--secondary), var(--primary), var(--secondary));
             color: white;
-            padding: 15px 0;
-            font-size: 16px;
+            padding: 12px 0;
+            font-size: 14px;
             font-weight: 600;
-            border-radius: 50px;
-            margin: 25px 0;
-            box-shadow: 0 5px 15px var(--primary-glow);
+            border-radius: 8px;
+            margin: 20px 0;
+            box-shadow: 0 3px 10px var(--primary-glow);
         }
 
         .marquee p {
@@ -608,25 +604,25 @@
         /* Date Display */
         .date {
             text-align: center;
-            font-size: 18px;
+            font-size: 14px;
             color: var(--primary-light);
-            margin: 20px 0;
+            margin: 15px 0;
             font-weight: 600;
             background: rgba(16, 185, 129, 0.1);
-            padding: 15px;
-            border-radius: var(--radius);
-            border: 1px solid rgba(16, 185, 129, 0.3);
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid rgba(16, 185, 129, 0.2);
         }
 
         /* Output Areas */
         .output, .conversion-result {
-            margin-top: 25px;
-            padding: 25px;
+            margin-top: 20px;
+            padding: 20px;
             background: rgba(15, 23, 42, 0.9);
             border-radius: var(--radius);
             border: 1px solid rgba(16, 185, 129, 0.3);
             color: var(--text);
-            max-height: 500px;
+            max-height: 400px;
             overflow-y: auto;
             box-shadow: var(--shadow);
         }
@@ -649,20 +645,6 @@
             50% { transform: translateY(-20px) rotate(180deg); }
         }
 
-        /* Star Elements */
-        .star {
-            position: absolute;
-            color: var(--red-accent);
-            font-size: 20px;
-            animation: twinkle 3s infinite alternate;
-            z-index: 1;
-        }
-
-        @keyframes twinkle {
-            0% { opacity: 0.3; transform: scale(0.8); }
-            100% { opacity: 1; transform: scale(1.2); }
-        }
-
         /* Notification */
         .notification {
             position: fixed;
@@ -670,8 +652,8 @@
             right: 20px;
             background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             color: white;
-            padding: 15px 25px;
-            border-radius: var(--radius);
+            padding: 12px 20px;
+            border-radius: 10px;
             box-shadow: var(--shadow);
             z-index: 1001;
             transform: translateX(150%);
@@ -679,6 +661,7 @@
             display: flex;
             align-items: center;
             gap: 10px;
+            font-size: 14px;
         }
 
         .notification.show {
@@ -730,6 +713,16 @@
             .dashboard-cards, .dashboard-stats {
                 grid-template-columns: 1fr;
             }
+            .prediction-table {
+                font-size: 10px;
+            }
+            .prediction-table th,
+            .prediction-table td {
+                padding: 8px 5px;
+            }
+            .prediction-table th {
+                font-size: 9px;
+            }
         }
 
         @media (max-width: 480px) {
@@ -748,12 +741,12 @@
             }
             .menu-item {
                 flex-direction: column;
-                padding: 10px;
-                font-size: 12px;
+                padding: 8px;
+                font-size: 11px;
             }
             .menu-item span {
                 display: block;
-                margin-top: 5px;
+                margin-top: 3px;
             }
             .content {
                 margin-left: 0;
@@ -761,6 +754,13 @@
             }
             .dashboard-section, .section {
                 padding: 15px;
+            }
+            .prediction-table {
+                font-size: 9px;
+            }
+            .league-header {
+                font-size: 11px !important;
+                padding: 8px !important;
             }
         }
     </style>
@@ -851,7 +851,7 @@
         <!-- Prediksi Bola Section -->
         <section id="prediksiBola" class="section" style="display:none;">
             <h2>Prediksi Bola Mewah</h2>
-            <p>Generate tabel prediksi bola yang elegan dengan tema hijau toska atau tema merah dengan bintang.</p>
+            <p>Generate tabel prediksi bola yang elegan dengan tema hijau toska atau tema merah super mewah dengan bintang di setiap tim.</p>
             
             <div class="marquee">
                 <p>★ PREDIKSI BOLA TERUPDATE! Daftar di ANGKABET dan nikmati pengalaman taruhan premium! ★</p>
@@ -868,14 +868,14 @@ Liga Spanyol
                 
                 <div class="btn-group">
                     <button class="btn" onclick="generateTable()"><i class="fas fa-table"></i> Generate Tabel</button>
-                    <button class="btn btn-secondary" onclick="showHtmlCode()"><i class="fas fa-code"></i> Tampilkan HTML</button>
-                    <button class="btn btn-red" onclick="showRedHtmlCode()"><i class="fas fa-code"></i> Tampilkan HTML Merah</button>
+                    <button class="btn btn-secondary" onclick="showHtmlCode()"><i class="fas fa-code"></i> Tampilkan HTML Hijau</button>
+                    <button class="btn btn-red" onclick="showRedHtmlCode()"><i class="fas fa-code"></i> Tampilkan HTML Merah Super Mewah</button>
                     <button class="btn btn-accent" onclick="copyHtmlCode()"><i class="fas fa-copy"></i> Copy HTML</button>
                 </div>
             </div>
 
             <div id="outputTable" class="output"></div>
-            <pre id="htmlCode" style="display:none; background:var(--secondary); color:var(--text); padding:20px; border-radius:var(--radius); overflow:auto; margin-top:20px;"></pre>
+            <pre id="htmlCode" style="display:none; background:var(--secondary); color:var(--text); padding:15px; border-radius:10px; overflow:auto; margin-top:20px; font-size:12px;"></pre>
         </section>
 
         <!-- Pengisian Teks Section -->
@@ -966,7 +966,7 @@ FRANCE LIGUE 2
         // Tampilkan dashboard secara default
         showSection('dashboard');
 
-        // Fungsi untuk generate tabel prediksi
+        // Fungsi untuk generate tabel prediksi dengan bintang di setiap tim
         function generateTable() {
             let input = document.getElementById("inputData").value.trim();
             if (input === "") {
@@ -999,9 +999,14 @@ FRANCE LIGUE 2
                         let team1 = match[2].trim();
                         let team2 = match[3].trim();
                         let score = match[4];
+                        // Tambahkan bintang di setiap tim
                         tableHtml += `<tr>
                             <td>${date}</td>
-                            <td class="match-cell">${team1} VS ${team2}</td>
+                            <td class="match-cell">
+                                <span class="team-star">★</span> ${team1} 
+                                <span style="color:#cbd5e1; font-weight:300;">VS</span> 
+                                ${team2} <span class="team-star">★</span>
+                            </td>
                             <td>${score}</td>
                         </tr>`;
                     } else {
@@ -1037,7 +1042,7 @@ FRANCE LIGUE 2
                 return;
             }
             
-            // CSS untuk HTML yang dihasilkan
+            // CSS untuk HTML yang dihasilkan dengan tema hijau
             const generatedCSS = `
 <style>
 * {
@@ -1051,18 +1056,18 @@ body {
     background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0d9488 100%);
     color: #f8fafc;
     min-height: 100vh;
-    padding: 20px;
+    padding: 15px;
 }
 
 .prediction-table {
     width: 100%;
     border-collapse: collapse;
-    margin: 25px 0;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-    border-radius: 16px;
+    margin: 15px 0;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
     overflow: hidden;
     background: linear-gradient(135deg, #0f172a, #1e293b);
-    font-size: 14px;
+    font-size: 11px;
     position: relative;
 }
 
@@ -1082,49 +1087,21 @@ body {
     background: linear-gradient(135deg, #10b981, #059669);
     color: white;
     text-align: center;
-    padding: 18px 12px;
+    padding: 10px 8px;
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
-    border-bottom: 3px solid #34d399;
-    position: relative;
-    overflow: hidden;
-}
-
-.prediction-table th::after {
-    content: '⚽';
-    position: absolute;
-    top: 50%;
-    left: 10px;
-    transform: translateY(-50%);
-    color: #fbbf24;
-    animation: bounce 2s infinite;
-    font-size: 12px;
-}
-
-.prediction-table th::before {
-    content: '⚽';
-    position: absolute;
-    top: 50%;
-    right: 10px;
-    transform: translateY(-50%);
-    color: #fbbf24;
-    animation: bounce 2s infinite 1s;
-    font-size: 12px;
-}
-
-@keyframes bounce {
-    0%, 100% { transform: translateY(-50%) scale(1); }
-    50% { transform: translateY(-50%) scale(1.2); }
+    letter-spacing: 0.3px;
+    border-bottom: 2px solid #34d399;
+    font-size: 10px;
 }
 
 .prediction-table td {
     text-align: center;
-    padding: 15px 12px;
+    padding: 8px 6px;
     color: #f8fafc;
-    border-bottom: 1px solid rgba(16, 185, 129, 0.2);
+    border-bottom: 1px solid rgba(16, 185, 129, 0.1);
     background: rgba(30, 41, 59, 0.8);
-    transition: all 0.3s ease;
+    transition: all 0.2s ease;
 }
 
 .prediction-table tr:nth-child(even) td {
@@ -1134,23 +1111,35 @@ body {
 .prediction-table tr:hover td {
     background: rgba(16, 185, 129, 0.1);
     color: #34d399;
-    transform: scale(1.02);
 }
 
 .prediction-table .match-cell {
-    position: relative;
     font-weight: 500;
     color: #34d399;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.team-star {
+    color: #fbbf24;
+    font-size: 9px;
+    animation: twinkle 2s infinite alternate;
+}
+
+@keyframes twinkle {
+    0% { opacity: 0.6; transform: scale(0.9); }
+    100% { opacity: 1; transform: scale(1.1); }
 }
 
 .league-header {
     background: linear-gradient(135deg, #059669, #0f172a) !important;
     color: #fbbf24 !important;
-    font-size: 18px !important;
+    font-size: 13px !important;
     text-align: center;
-    padding: 20px !important;
-    position: relative;
-    overflow: hidden;
+    padding: 10px !important;
+    font-weight: 600;
 }
 
 .marquee {
@@ -1158,12 +1147,12 @@ body {
     white-space: nowrap;
     background: linear-gradient(90deg, #0f172a, #10b981, #0f172a);
     color: white;
-    padding: 15px 0;
-    font-size: 16px;
+    padding: 10px 0;
+    font-size: 13px;
     font-weight: 600;
-    border-radius: 50px;
-    margin: 25px 0;
-    box-shadow: 0 5px 15px rgba(16, 185, 129, 0.3);
+    border-radius: 6px;
+    margin: 15px 0;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
 }
 
 .marquee p {
@@ -1179,28 +1168,33 @@ body {
 
 .date {
     text-align: center;
-    font-size: 18px;
+    font-size: 13px;
     color: #34d399;
-    margin: 20px 0;
+    margin: 15px 0;
     font-weight: 600;
     background: rgba(16, 185, 129, 0.1);
-    padding: 15px;
-    border-radius: 16px;
-    border: 1px solid rgba(16, 185, 129, 0.3);
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid rgba(16, 185, 129, 0.2);
 }
 
 @media (max-width: 768px) {
     .prediction-table {
-        font-size: 12px;
+        font-size: 10px;
     }
     
     .prediction-table th, 
     .prediction-table td {
-        padding: 12px 8px;
+        padding: 8px 5px;
     }
     
     .prediction-table th {
-        font-size: 11px;
+        font-size: 9px;
+    }
+    
+    .league-header {
+        font-size: 11px !important;
+        padding: 8px !important;
     }
 }
 </style>`;
@@ -1211,7 +1205,7 @@ body {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prediksi Bola</title>
+    <title>Prediksi Bola - Tema Hijau Elegant</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     ${generatedCSS}
 </head>
@@ -1227,7 +1221,7 @@ body {
             showNotification("Kode HTML tema hijau berhasil dibuat!");
         }
 
-        // Fungsi untuk menampilkan kode HTML dengan tema merah dan bintang
+        // Fungsi untuk menampilkan kode HTML dengan tema merah super mewah
         function showRedHtmlCode() {
             const currentDate = new Date();
             const daysOfWeek = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
@@ -1247,7 +1241,7 @@ body {
                 return;
             }
             
-            // CSS untuk HTML yang dihasilkan dengan tema merah
+            // CSS untuk HTML yang dihasilkan dengan tema merah super mewah
             const generatedCSS = `
 <style>
 * {
@@ -1258,187 +1252,533 @@ body {
 }
 
 body {
-    background: linear-gradient(135deg, #1a0f0f 0%, #2a1a1a 50%, #8b0000 100%);
-    color: #f8fafc;
+    background: linear-gradient(135deg, #0a0505 0%, #1a0a0a 50%, #2a0a0a 100%);
+    color: #ffffff;
     min-height: 100vh;
     padding: 20px;
     position: relative;
     overflow-x: hidden;
 }
 
-.star {
+/* Background pattern mewah */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: 
+        radial-gradient(circle at 10% 20%, rgba(255, 215, 0, 0.1) 0%, transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(255, 215, 0, 0.1) 0%, transparent 40%),
+        radial-gradient(circle at 50% 50%, rgba(239, 68, 68, 0.05) 0%, transparent 50%);
+    z-index: 0;
+}
+
+/* Container utama */
+.container {
+    position: relative;
+    z-index: 1;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Header dengan dekorasi bintang */
+.header {
+    text-align: center;
+    padding: 30px 20px;
+    position: relative;
+    overflow: hidden;
+    border-bottom: 3px solid rgba(255, 215, 0, 0.3);
+    margin-bottom: 30px;
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(26, 10, 10, 0.8));
+    border-radius: 20px;
+    box-shadow: 0 15px 35px rgba(239, 68, 68, 0.3);
+}
+
+.header::before {
+    content: '✦✦✦✦✦✦✦✦✦✦';
     position: absolute;
-    color: #f59e0b;
-    font-size: 20px;
-    animation: twinkle 3s infinite alternate;
+    top: 15px;
+    left: 0;
+    right: 0;
+    color: rgba(255, 215, 0, 0.2);
+    font-size: 24px;
+    letter-spacing: 15px;
+    z-index: 0;
+}
+
+.header-content {
+    position: relative;
     z-index: 1;
 }
 
-@keyframes twinkle {
-    0% { opacity: 0.3; transform: scale(0.8); }
-    100% { opacity: 1; transform: scale(1.2); }
+.date-display {
+    font-size: 18px;
+    color: #ffd700;
+    font-weight: 700;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+    background: linear-gradient(135deg, rgba(220, 38, 38, 0.3), rgba(26, 10, 10, 0.8));
+    padding: 15px 30px;
+    border-radius: 50px;
+    display: inline-block;
+    margin-bottom: 20px;
+    border: 2px solid rgba(255, 215, 0, 0.4);
+    box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
 }
 
-.prediction-table {
-    width: 100%;
-    border-collapse: collapse;
+.marquee-premium {
+    background: linear-gradient(90deg, 
+        #1a0a0a 0%, 
+        #ef4444 20%, 
+        #dc2626 50%, 
+        #ef4444 80%, 
+        #1a0a0a 100%);
+    color: #ffd700;
+    padding: 18px 0;
+    border-radius: 12px;
     margin: 25px 0;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-    border-radius: 16px;
+    position: relative;
     overflow: hidden;
-    background: linear-gradient(135deg, #1a0f0f, #2a1a1a);
-    font-size: 14px;
+    border: 2px solid rgba(255, 215, 0, 0.3);
+    box-shadow: 0 10px 25px rgba(239, 68, 68, 0.4);
+}
+
+.marquee-premium::before {
+    content: '★';
+    position: absolute;
+    left: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #ffd700;
+    font-size: 20px;
+    animation: spin 3s linear infinite;
+}
+
+.marquee-premium::after {
+    content: '★';
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #ffd700;
+    font-size: 20px;
+    animation: spin 3s linear infinite reverse;
+}
+
+@keyframes spin {
+    0% { transform: translateY(-50%) rotate(0deg); }
+    100% { transform: translateY(-50%) rotate(360deg); }
+}
+
+.marquee-text {
+    display: inline-block;
+    font-size: 18px;
+    font-weight: 700;
+    white-space: nowrap;
+    animation: marquee-premium 25s linear infinite;
+    padding-left: 100%;
+    padding-right: 50px;
+    letter-spacing: 1px;
+    text-shadow: 0 2px 5px rgba(0, 0, 0, 0.7);
+}
+
+@keyframes marquee-premium {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-100%); }
+}
+
+/* Tabel premium */
+.prediction-table-premium {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin: 30px 0;
+    border-radius: 15px;
+    overflow: hidden;
+    background: linear-gradient(145deg, rgba(26, 10, 10, 0.9), rgba(42, 15, 15, 0.9));
+    font-size: 12px;
+    position: relative;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    border: 2px solid rgba(255, 215, 0, 0.2);
+}
+
+.prediction-table-premium::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, 
+        #ef4444, #dc2626, #b91c1c, 
+        #dc2626, #ef4444);
+    z-index: -1;
+    border-radius: 17px;
+    opacity: 0.3;
+    animation: borderGlow 3s ease-in-out infinite alternate;
+}
+
+@keyframes borderGlow {
+    0% { opacity: 0.3; }
+    100% { opacity: 0.6; }
+}
+
+.prediction-table-premium th {
+    background: linear-gradient(145deg, #ef4444, #dc2626, #b91c1c);
+    color: #ffd700;
+    text-align: center;
+    padding: 14px 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-bottom: 3px solid #ffd700;
+    font-size: 11px;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    position: relative;
+    overflow: hidden;
+}
+
+.prediction-table-premium th::after {
+    content: '✦';
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #ffd700;
+    font-size: 12px;
+    animation: sparkle 2s infinite alternate;
+}
+
+.prediction-table-premium th::before {
+    content: '✦';
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #ffd700;
+    font-size: 12px;
+    animation: sparkle 2s infinite alternate-reverse;
+}
+
+@keyframes sparkle {
+    0% { opacity: 0.5; transform: translateY(-50%) scale(0.8); }
+    100% { opacity: 1; transform: translateY(-50%) scale(1.2); }
+}
+
+.prediction-table-premium td {
+    text-align: center;
+    padding: 12px 10px;
+    color: #ffffff;
+    border-bottom: 1px solid rgba(255, 215, 0, 0.1);
+    background: rgba(42, 15, 15, 0.7);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     position: relative;
 }
 
-.prediction-table::before {
+.prediction-table-premium td::before {
     content: '';
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(45deg, transparent 30%, rgba(239, 68, 68, 0.3) 50%, transparent 70%);
-    opacity: 0.1;
+    background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.1), transparent);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.prediction-table-premium tr:nth-child(even) td {
+    background: rgba(26, 10, 10, 0.7);
+}
+
+.prediction-table-premium tr:hover td {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ffd700;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(239, 68, 68, 0.3);
+}
+
+.prediction-table-premium tr:hover td::before {
+    opacity: 1;
+}
+
+/* Cell khusus untuk pertandingan */
+.match-cell-premium {
+    font-weight: 600;
+    color: #ffd700 !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 15px 10px !important;
+    position: relative;
+}
+
+.team-star-premium {
+    color: #ffd700;
+    font-size: 14px;
+    animation: starTwinkle 1.5s infinite alternate;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.8);
+    position: relative;
+}
+
+.team-star-premium::after {
+    content: '✨';
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    font-size: 8px;
+    opacity: 0;
+    animation: sparkleEffect 1.5s infinite alternate;
+}
+
+@keyframes starTwinkle {
+    0% { 
+        opacity: 0.7; 
+        transform: scale(0.9) rotate(0deg); 
+    }
+    100% { 
+        opacity: 1; 
+        transform: scale(1.1) rotate(5deg); 
+    }
+}
+
+@keyframes sparkleEffect {
+    0%, 100% { opacity: 0; }
+    50% { opacity: 1; }
+}
+
+.team-name {
+    font-weight: 600;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    position: relative;
+    padding: 0 5px;
+}
+
+.team-name::before {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #ffd700, transparent);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.prediction-table-premium tr:hover .team-name::before {
+    opacity: 1;
+}
+
+.vs-separator {
+    color: rgba(255, 255, 255, 0.7);
+    font-weight: 300;
+    font-style: italic;
+    padding: 0 8px;
+    position: relative;
+}
+
+.vs-separator::before {
+    content: '⚽';
+    position: absolute;
+    left: -15px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 8px;
+    opacity: 0.5;
+}
+
+.vs-separator::after {
+    content: '⚽';
+    position: absolute;
+    right: -15px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 8px;
+    opacity: 0.5;
+}
+
+.league-header-premium {
+    background: linear-gradient(145deg, 
+        rgba(220, 38, 38, 0.9), 
+        rgba(185, 28, 28, 0.9), 
+        rgba(127, 29, 29, 0.9)) !important;
+    color: #ffd700 !important;
+    font-size: 16px !important;
+    text-align: center;
+    padding: 20px !important;
+    font-weight: 800 !important;
+    letter-spacing: 1.5px !important;
+    text-transform: uppercase !important;
+    border-bottom: 2px solid #ffd700 !important;
+    position: relative;
+    overflow: hidden;
+}
+
+.league-header-premium::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, 
+        transparent, 
+        rgba(255, 215, 0, 0.2), 
+        transparent);
+    animation: shine 3s infinite linear;
+}
+
+@keyframes shine {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+/* Footer premium */
+.footer-premium {
+    text-align: center;
+    margin: 40px 0 20px;
+    padding: 25px 20px;
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(26, 10, 10, 0.8));
+    border-radius: 20px;
+    border: 2px solid rgba(255, 215, 0, 0.3);
+    box-shadow: 0 10px 25px rgba(239, 68, 68, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.footer-premium::before {
+    content: '★★★★★★★★★★';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    transform: translateY(-50%);
+    color: rgba(255, 215, 0, 0.15);
+    font-size: 30px;
+    letter-spacing: 15px;
+    z-index: 0;
+}
+
+.footer-text {
+    position: relative;
+    z-index: 1;
+    color: #ffd700;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+/* Floating stars decoration */
+.floating-star {
+    position: fixed;
+    color: rgba(255, 215, 0, 0.3);
+    font-size: 20px;
+    animation: floatStar 10s infinite linear;
+    z-index: 0;
     pointer-events: none;
 }
 
-.prediction-table th {
-    background: linear-gradient(135deg, #ef4444, #dc2626);
-    color: white;
-    text-align: center;
-    padding: 18px 12px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    border-bottom: 3px solid #f87171;
-    position: relative;
-    overflow: hidden;
+@keyframes floatStar {
+    0% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 0.2;
+    }
+    50% {
+        opacity: 0.5;
+    }
+    100% {
+        transform: translateY(-100vh) rotate(360deg);
+        opacity: 0.2;
+    }
 }
 
-.prediction-table th::after {
-    content: '★';
-    position: absolute;
-    top: 50%;
-    left: 10px;
-    transform: translateY(-50%);
-    color: #f59e0b;
-    animation: bounce 2s infinite;
-    font-size: 12px;
-}
-
-.prediction-table th::before {
-    content: '★';
-    position: absolute;
-    top: 50%;
-    right: 10px;
-    transform: translateY(-50%);
-    color: #f59e0b;
-    animation: bounce 2s infinite 1s;
-    font-size: 12px;
-}
-
-@keyframes bounce {
-    0%, 100% { transform: translateY(-50%) scale(1); }
-    50% { transform: translateY(-50%) scale(1.2); }
-}
-
-.prediction-table td {
-    text-align: center;
-    padding: 15px 12px;
-    color: #f8fafc;
-    border-bottom: 1px solid rgba(239, 68, 68, 0.2);
-    background: rgba(42, 26, 26, 0.8);
-    transition: all 0.3s ease;
-}
-
-.prediction-table tr:nth-child(even) td {
-    background: rgba(26, 15, 15, 0.8);
-}
-
-.prediction-table tr:hover td {
-    background: rgba(239, 68, 68, 0.1);
-    color: #f87171;
-    transform: scale(1.02);
-}
-
-.prediction-table .match-cell {
-    position: relative;
-    font-weight: 500;
-    color: #f87171;
-}
-
-.league-header {
-    background: linear-gradient(135deg, #dc2626, #1a0f0f) !important;
-    color: #f59e0b !important;
-    font-size: 18px !important;
-    text-align: center;
-    padding: 20px !important;
-    position: relative;
-    overflow: hidden;
-}
-
-.marquee {
-    overflow: hidden;
-    white-space: nowrap;
-    background: linear-gradient(90deg, #1a0f0f, #ef4444, #1a0f0f);
-    color: white;
-    padding: 15px 0;
-    font-size: 16px;
-    font-weight: 600;
-    border-radius: 50px;
-    margin: 25px 0;
-    box-shadow: 0 5px 15px rgba(239, 68, 68, 0.3);
-}
-
-.marquee p {
-    display: inline-block;
-    animation: marquee 20s linear infinite;
-    padding-left: 100%;
-}
-
-@keyframes marquee {
-    0% { transform: translateX(0); }
-    100% { transform: translateX(-100%); }
-}
-
-.date {
-    text-align: center;
-    font-size: 18px;
-    color: #f87171;
-    margin: 20px 0;
-    font-weight: 600;
-    background: rgba(239, 68, 68, 0.1);
-    padding: 15px;
-    border-radius: 16px;
-    border: 1px solid rgba(239, 68, 68, 0.3);
-}
-
+/* Media queries untuk responsif */
 @media (max-width: 768px) {
-    .prediction-table {
+    .container {
+        padding: 10px;
+    }
+    
+    .header {
+        padding: 20px 15px;
+        border-radius: 15px;
+    }
+    
+    .date-display {
+        font-size: 14px;
+        padding: 10px 20px;
+    }
+    
+    .marquee-premium {
+        padding: 12px 0;
+        border-radius: 8px;
+    }
+    
+    .marquee-text {
+        font-size: 14px;
+    }
+    
+    .prediction-table-premium {
+        font-size: 10px;
+        border-radius: 10px;
+    }
+    
+    .prediction-table-premium th,
+    .prediction-table-premium td {
+        padding: 10px 6px;
+    }
+    
+    .prediction-table-premium th {
+        font-size: 9px;
+    }
+    
+    .league-header-premium {
+        font-size: 13px !important;
+        padding: 15px !important;
+    }
+    
+    .match-cell-premium {
+        gap: 6px;
+        padding: 12px 6px !important;
+    }
+    
+    .team-star-premium {
+        font-size: 10px;
+    }
+    
+    .footer-premium {
+        padding: 20px 15px;
+        border-radius: 15px;
+    }
+    
+    .footer-text {
         font-size: 12px;
-    }
-    
-    .prediction-table th, 
-    .prediction-table td {
-        padding: 12px 8px;
-    }
-    
-    .prediction-table th {
-        font-size: 11px;
     }
 }
 </style>`;
 
-            // Fungsi untuk menghasilkan bintang secara acak
-            const generateStars = () => {
+            // Fungsi untuk menghasilkan bintang-bintang melayang
+            const generateFloatingStars = () => {
                 let stars = '';
-                for (let i = 0; i < 15; i++) {
-                    const top = Math.random() * 100;
-                    const left = Math.random() * 100;
-                    const delay = Math.random() * 5;
-                    stars += `<div class="star" style="top: ${top}%; left: ${left}%; animation-delay: ${delay}s;">★</div>`;
-                }
+                const starPositions = [
+                    'top: 10%; left: 5%; animation-delay: 0s;',
+                    'top: 20%; left: 15%; animation-delay: 1s;',
+                    'top: 15%; left: 85%; animation-delay: 2s;',
+                    'top: 60%; left: 10%; animation-delay: 3s;',
+                    'top: 70%; left: 90%; animation-delay: 4s;',
+                    'top: 40%; left: 75%; animation-delay: 5s;',
+                    'top: 85%; left: 25%; animation-delay: 6s;',
+                    'top: 30%; left: 50%; animation-delay: 7s;',
+                    'top: 55%; left: 60%; animation-delay: 8s;',
+                    'top: 25%; left: 20%; animation-delay: 9s;'
+                ];
+                
+                starPositions.forEach(pos => {
+                    stars += `<div class="floating-star" style="${pos}">✦</div>`;
+                });
+                
                 return stars;
             };
 
@@ -1448,21 +1788,47 @@ body {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prediksi Bola - Tema Merah Mewah</title>
+    <title>Prediksi Bola - Tema Merah Super Mewah</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     ${generatedCSS}
 </head>
 <body>
-    ${generateStars()}
-    <div class="date">${formattedDate}</div>
-    <div class="marquee">
-        <p>★ PREDIKSI BOLA AKURAT & TERUPDATE! Daftar di ANGKABET dan nikmati pengalaman taruhan premium! ★</p>
+    ${generateFloatingStars()}
+    
+    <div class="container">
+        <div class="header">
+            <div class="header-content">
+                <div class="date-display">${formattedDate}</div>
+                <div class="marquee-premium">
+                    <div class="marquee-text">★ PREDIKSI BOLA AKURAT & TERUPDATE! DAFTAR DI ANGKABET DAN NIKMATI PENGALAMAN TARUHAN PREMIUM! ★</div>
+                </div>
+            </div>
+        </div>
+        
+        ${tableContent.replace(/prediction-table/g, 'prediction-table-premium')
+                     .replace(/match-cell/g, 'match-cell-premium')
+                     .replace(/league-header/g, 'league-header-premium')
+                     .replace(/team-star/g, 'team-star-premium')
+                     .replace(/<td class="match-cell-premium">(.*?)<\/td>/g, (match, content) => {
+                         return `<td class="match-cell-premium">
+                             <span class="team-star-premium">★</span> 
+                             <span class="team-name">${content.split('VS')[0].replace('★', '').trim()}</span>
+                             <span class="vs-separator">VS</span>
+                             <span class="team-name">${content.split('VS')[1].replace('★', '').trim()}</span>
+                             <span class="team-star-premium">★</span>
+                         </td>`;
+                     })}
+        
+        <div class="footer-premium">
+            <div class="footer-text">
+                ⚽ PREDIKSI DISUSUN OLEH TIM AHLI ⚽ | © ${new Date().getFullYear()} ANGKABET - SEMUA HAK DILINDUNGI
+            </div>
+        </div>
     </div>
-    ${tableContent}
 </body>
 </html>`;
             
-            showNotification("Kode HTML tema merah berhasil dibuat!");
+            showNotification("Kode HTML tema merah super mewah berhasil dibuat!");
         }
 
         // Fungsi untuk copy kode HTML
