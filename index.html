@@ -3,6 +3,915 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SiLubis Premium — Football Prediction Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Bebas+Neue&family=Anton&family=Orbitron:wght@700;800;900&family=Cinzel:wght@700;800;900&family=JetBrains+Mono:ital,wght@0,300;0,400;0,600;1,400&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+/* ═══════════════════════════════════════════
+   ROOT TOKENS
+═══════════════════════════════════════════ */
+:root {
+  --c-bg:        #020608;
+  --c-surface:   #060f12;
+  --c-panel:     #07131a;
+  --c-card:      #0a1a23;
+  --c-lift:      #0d2030;
+
+  --c-teal:      #0ef3c0;
+  --c-teal-mid:  #08c99a;
+  --c-teal-dim:  #056648;
+  --c-teal-ghost:rgba(14,243,192,0.06);
+  --c-teal-glow: rgba(14,243,192,0.22);
+
+  --c-gold:      #f5c842;
+  --c-gold-dim:  rgba(245,200,66,0.12);
+  --c-gold-glow: rgba(245,200,66,0.3);
+
+  --c-border:    rgba(14,243,192,0.1);
+  --c-border-hi: rgba(14,243,192,0.3);
+
+  --c-text:      #dff5ef;
+  --c-text-mid:  #6b9e90;
+  --c-text-dim:  #2a4a3e;
+
+  --r-xl: 24px;
+  --r-lg: 18px;
+  --r-md: 12px;
+  --r-sm: 8px;
+
+  --f-display: 'Black Ops One', cursive;
+  --f-body:    'Rajdhani', sans-serif;
+  --f-mono:    'JetBrains Mono', monospace;
+  --f-serif:   'Bebas Neue', cursive;
+  --f-play:    'Anton', sans-serif;
+
+  --sidebar-w: 288px;
+  --topbar-h:  72px;
+}
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--f-body);
+  background: var(--c-bg);
+  color: var(--c-text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.bg-orb { position: fixed; border-radius: 50%; filter: blur(120px); pointer-events: none; z-index: 0; }
+.orb-1 { width:600px;height:600px;background:radial-gradient(circle,rgba(14,243,192,0.07) 0%,transparent 70%);top:-200px;left:-100px;animation:orb-drift 18s ease-in-out infinite alternate; }
+.orb-2 { width:500px;height:500px;background:radial-gradient(circle,rgba(8,120,90,0.06) 0%,transparent 70%);bottom:-150px;right:-50px;animation:orb-drift 22s ease-in-out infinite alternate-reverse; }
+.orb-3 { width:300px;height:300px;background:radial-gradient(circle,rgba(245,200,66,0.04) 0%,transparent 70%);top:40%;left:30%;animation:orb-drift 30s ease-in-out infinite alternate; }
+@keyframes orb-drift { 0%{transform:translate(0,0) scale(1);}100%{transform:translate(40px,30px) scale(1.1);} }
+
+/* ═══════════════════════════════════════════
+   RGB LED STRIP KEYFRAMES
+═══════════════════════════════════════════ */
+@keyframes rgb-flow {
+  0%   { background-position: 0% 50%; box-shadow: 0 0 12px 3px rgba(255,0,80,0.7), 0 0 30px rgba(255,0,80,0.3); }
+  14%  { background-position: 14% 50%; box-shadow: 0 0 12px 3px rgba(255,100,0,0.7), 0 0 30px rgba(255,100,0,0.3); }
+  28%  { background-position: 28% 50%; box-shadow: 0 0 12px 3px rgba(255,220,0,0.7), 0 0 30px rgba(255,220,0,0.3); }
+  42%  { background-position: 42% 50%; box-shadow: 0 0 12px 3px rgba(0,255,120,0.7), 0 0 30px rgba(0,255,120,0.3); }
+  57%  { background-position: 57% 50%; box-shadow: 0 0 12px 3px rgba(0,200,255,0.7), 0 0 30px rgba(0,200,255,0.3); }
+  71%  { background-position: 71% 50%; box-shadow: 0 0 12px 3px rgba(100,0,255,0.7), 0 0 30px rgba(100,0,255,0.3); }
+  85%  { background-position: 85% 50%; box-shadow: 0 0 12px 3px rgba(255,0,180,0.7), 0 0 30px rgba(255,0,180,0.3); }
+  100% { background-position: 100% 50%; box-shadow: 0 0 12px 3px rgba(255,0,80,0.7), 0 0 30px rgba(255,0,80,0.3); }
+}
+
+@keyframes rgb-flow-slow {
+  0%   { background-position: 0% 50%; }
+  100% { background-position: 400% 50%; }
+}
+
+/* LED Strip component */
+.led-strip {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  border-radius: var(--r-lg) var(--r-lg) 0 0;
+  background: linear-gradient(90deg,
+    #ff003c, #ff5500, #ffaa00, #aaff00,
+    #00ffcc, #00aaff, #aa00ff, #ff0055,
+    #ff003c, #ff5500, #ffaa00, #aaff00,
+    #00ffcc, #00aaff, #aa00ff, #ff0055, #ff003c);
+  background-size: 400% 100%;
+  animation: rgb-flow 3s linear infinite;
+  z-index: 10;
+}
+
+.led-strip::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: inherit;
+  filter: blur(8px);
+  opacity: 0.8;
+  animation: rgb-flow 3s linear infinite;
+}
+
+/* Varied speeds per card */
+.led-strip.speed-2 { animation-duration: 2.5s; }
+.led-strip.speed-2::after { animation-duration: 2.5s; }
+.led-strip.speed-3 { animation-duration: 3.5s; }
+.led-strip.speed-3::after { animation-duration: 3.5s; }
+.led-strip.speed-4 { animation-duration: 4s; }
+.led-strip.speed-4::after { animation-duration: 4s; }
+.led-strip.speed-5 { animation-duration: 2s; }
+.led-strip.speed-5::after { animation-duration: 2s; }
+.led-strip.speed-6 { animation-duration: 4.5s; }
+.led-strip.speed-6::after { animation-duration: 4.5s; }
+.led-strip.speed-7 { animation-duration: 5s; }
+.led-strip.speed-7::after { animation-duration: 5s; }
+
+/* ═══════════════════════════════════════════
+   SIDEBAR
+═══════════════════════════════════════════ */
+.sidebar {
+  position: fixed; top:0;left:0;
+  width: var(--sidebar-w); height: 100vh;
+  z-index: 200;
+  display: flex; flex-direction: column;
+  background: linear-gradient(160deg, rgba(4,14,18,0.98) 0%, rgba(5,18,22,0.97) 60%, rgba(3,10,14,0.99) 100%);
+  border-right: 1px solid var(--c-border);
+  backdrop-filter: blur(40px);
+  box-shadow: 1px 0 0 rgba(14,243,192,0.06), 4px 0 30px rgba(0,0,0,0.6), inset -1px 0 0 rgba(14,243,192,0.04);
+}
+.sidebar::before {
+  content:''; position:absolute;top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--c-teal),transparent);
+  opacity:0.5;
+}
+
+.sb-brand { padding:32px 28px 24px; border-bottom:1px solid var(--c-border); position:relative; }
+.sb-logo-wrap { display:flex;align-items:center;gap:14px; margin-bottom:4px; }
+.sb-logo-icon {
+  width:46px;height:46px; border-radius:14px;
+  background:linear-gradient(135deg,var(--c-teal-mid),#045e42);
+  display:flex;align-items:center;justify-content:center; font-size:20px;
+  position:relative; flex-shrink:0;
+  box-shadow: 0 0 0 1px rgba(14,243,192,0.3), 0 4px 20px rgba(14,243,192,0.2), 0 8px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.15);
+}
+.sb-logo-icon::after { content:'';position:absolute;inset:0;border-radius:14px;background:linear-gradient(135deg,rgba(255,255,255,0.12) 0%,transparent 60%); }
+
+.sb-brand-text { flex:1; }
+.sb-brand-name {
+  font-family:'Black Ops One', cursive; font-size:19px;font-weight:400;letter-spacing:3px;line-height:1;
+  background:linear-gradient(180deg,#d0fff4 0%,#0ef3c0 30%,#04a87a 55%,#0ef3c0 80%,#b0ffe8 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  filter:drop-shadow(0 1px 0 rgba(0,0,0,0.95)) drop-shadow(0 2px 0 rgba(0,0,0,0.8)) drop-shadow(0 3px 6px rgba(0,0,0,0.6)) drop-shadow(0 0 14px rgba(14,243,192,0.25));
+}
+.sb-brand-tag { font-size:10px;font-weight:500;color:var(--c-teal-mid);letter-spacing:1.5px;text-transform:uppercase;margin-top:4px; }
+
+.sb-version {
+  display:inline-flex;align-items:center;gap:5px;
+  background:var(--c-teal-ghost);border:1px solid var(--c-border);border-radius:20px;
+  padding:4px 10px;font-size:10px;font-weight:600;color:var(--c-teal);letter-spacing:0.5px;margin-top:12px;
+}
+.sb-version-dot { width:5px;height:5px;background:var(--c-teal);border-radius:50%;box-shadow:0 0 5px var(--c-teal);animation:pulse-live 1.8s infinite; }
+@keyframes pulse-live { 0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.4;transform:scale(0.7);} }
+
+.sb-section-label { padding:22px 28px 8px;font-size:9.5px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--c-text-dim);font-family:var(--f-mono); }
+
+.sb-nav { padding:0 14px; }
+.sb-item {
+  display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:var(--r-md);
+  cursor:pointer;color:var(--c-text-mid);font-size:13.5px;font-weight:500;text-decoration:none;
+  transition:all 0.22s cubic-bezier(0.2,0,0,1);position:relative;margin-bottom:2px;
+  border:1px solid transparent;letter-spacing:-0.1px;
+}
+.sb-item:hover { background:rgba(14,243,192,0.05);color:var(--c-text);border-color:rgba(14,243,192,0.1); }
+.sb-item.active {
+  background:linear-gradient(135deg,rgba(14,243,192,0.1) 0%,rgba(8,180,130,0.05) 100%);
+  color:var(--c-teal);border-color:rgba(14,243,192,0.2);
+  box-shadow:inset 0 1px 0 rgba(14,243,192,0.1),0 2px 12px rgba(0,0,0,0.3);
+}
+.sb-item.active::before {
+  content:'';position:absolute;left:-14px;top:20%;bottom:20%;width:3px;
+  background:var(--c-teal);border-radius:0 3px 3px 0;box-shadow:0 0 8px var(--c-teal);
+}
+.sb-item-icon {
+  width:34px;height:34px;border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;
+  font-size:14px;flex-shrink:0;background:rgba(14,243,192,0.06);border:1px solid rgba(14,243,192,0.1);transition:all 0.22s;
+}
+.sb-item.active .sb-item-icon { background:rgba(14,243,192,0.15);border-color:rgba(14,243,192,0.3);box-shadow:0 2px 10px rgba(14,243,192,0.15); }
+.sb-item:hover .sb-item-icon { background:rgba(14,243,192,0.1); }
+.sb-item-text { flex:1; }
+.sb-item-label { display:block;font-family:var(--f-body); }
+.sb-item-sub { display:block;font-size:10px;color:var(--c-text-dim);margin-top:1px;font-weight:400; }
+.sb-item.active .sb-item-sub { color:var(--c-teal-dim); }
+.sb-item-badge { font-size:9px;font-weight:700;padding:2px 7px;border-radius:10px;letter-spacing:0.5px; }
+.badge-new { background:rgba(14,243,192,0.15);color:var(--c-teal);border:1px solid rgba(14,243,192,0.25); }
+.badge-hot { background:rgba(245,80,50,0.15);color:#f87171;border:1px solid rgba(245,80,50,0.25); }
+
+.sb-footer { margin-top:auto;padding:20px 14px;border-top:1px solid var(--c-border); }
+.sb-user {
+  display:flex;align-items:center;gap:12px;padding:12px 14px;
+  background:var(--c-teal-ghost);border:1px solid var(--c-border);border-radius:var(--r-md);cursor:pointer;transition:all 0.2s;
+}
+.sb-user:hover { border-color:var(--c-border-hi); }
+.sb-avatar {
+  width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--c-teal-mid),#034d35);
+  display:flex;align-items:center;justify-content:center;font-family:var(--f-display);
+  font-size:14px;font-weight:800;color:var(--c-bg);flex-shrink:0;box-shadow:0 2px 10px rgba(14,243,192,0.2);
+}
+.sb-user-name { font-size:13px;font-weight:600;color:var(--c-text); }
+.sb-user-role { font-size:11px;color:var(--c-teal);font-weight:500; }
+.sb-user-arrow { margin-left:auto;color:var(--c-text-dim);font-size:11px; }
+
+/* ═══════════════════════════════════════════
+   MAIN CONTENT
+═══════════════════════════════════════════ */
+.content { margin-left:var(--sidebar-w);min-height:100vh;position:relative;z-index:1; }
+
+.topbar {
+  height:var(--topbar-h);display:flex;align-items:center;justify-content:space-between;
+  padding:0 36px;background:rgba(3,8,10,0.7);backdrop-filter:blur(30px);
+  border-bottom:1px solid var(--c-border);position:sticky;top:0;z-index:100;
+  box-shadow:0 4px 30px rgba(0,0,0,0.4);
+  /* LED on topbar too */
+  position: sticky;
+}
+.topbar::after {
+  content:'';position:absolute;bottom:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,#ff003c,#ff5500,#ffaa00,#aaff00,#00ffcc,#00aaff,#aa00ff,#ff0055,#ff003c,#ff5500,#ffaa00,#aaff00,#00ffcc,#00aaff,#aa00ff,#ff0055,#ff003c);
+  background-size:400% 100%;
+  animation:rgb-flow-slow 8s linear infinite;
+  z-index:5;
+}
+
+.topbar-left {}
+.topbar-eyebrow { font-size:9px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--c-teal);font-family:var(--f-mono);margin-bottom:2px;text-shadow:0 0 10px rgba(14,243,192,0.4); }
+.topbar-title {
+  font-family:'Black Ops One', cursive;font-size:24px;font-weight:400;letter-spacing:3px;line-height:1;
+  background:linear-gradient(180deg,
+    #ffffff 0%, #c8fff4 8%,
+    #0ef3c0 28%, #04a87a 48%,
+    #0ef3c0 68%, #c0ffe8 88%, #ffffff 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  filter:
+    drop-shadow(0 1px 0 rgba(0,0,0,0.99))
+    drop-shadow(0 2px 0 rgba(0,0,0,0.9))
+    drop-shadow(0 3px 0 rgba(0,50,30,0.6))
+    drop-shadow(0 4px 0 rgba(0,30,20,0.4))
+    drop-shadow(0 5px 10px rgba(0,0,0,0.7))
+    drop-shadow(0 0 22px rgba(14,243,192,0.35));
+}
+
+.topbar-right { display:flex;align-items:center;gap:12px; }
+.tb-chip { display:flex;align-items:center;gap:7px;padding:8px 16px;border-radius:40px;font-size:12px;font-weight:600;border:1px solid;cursor:default; }
+.tb-chip-live { background:rgba(14,243,192,0.07);border-color:rgba(14,243,192,0.25);color:var(--c-teal); }
+.tb-chip-date { background:rgba(14,243,192,0.04);border-color:var(--c-border);color:var(--c-text-mid);font-family:var(--f-mono);font-size:11px; }
+.tb-live-dot { width:6px;height:6px;border-radius:50%;background:var(--c-teal);box-shadow:0 0 8px var(--c-teal);animation:pulse-live 1.5s infinite; }
+.tb-icon-btn { width:38px;height:38px;border-radius:var(--r-sm);background:var(--c-teal-ghost);border:1px solid var(--c-border);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--c-text-mid);font-size:13px;transition:all 0.2s; }
+.tb-icon-btn:hover { border-color:var(--c-border-hi);color:var(--c-teal);background:rgba(14,243,192,0.1); }
+
+/* ═══════════════════════════════════════════
+   PAGES
+═══════════════════════════════════════════ */
+.main { padding:32px 36px; }
+.page { display:none;animation:page-in 0.35s cubic-bezier(0.2,0,0,1) forwards; }
+.page.active { display:block; }
+@keyframes page-in { from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);} }
+
+/* ═══════════════════════════════════════════
+   STAT CARDS — with RGB LED strip
+═══════════════════════════════════════════ */
+.stat-grid { display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px; }
+
+.stat-card {
+  background: linear-gradient(145deg, rgba(10,26,35,0.9) 0%, rgba(7,19,26,0.95) 100%);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-lg);
+  padding: 22px;
+  position: relative; overflow: hidden;
+  cursor: default;
+  transition: all 0.28s cubic-bezier(0.2,0,0,1);
+  box-shadow:
+    0 1px 0 rgba(14,243,192,0.06) inset,
+    0 -1px 0 rgba(0,0,0,0.4) inset,
+    0 8px 24px rgba(0,0,0,0.3);
+}
+
+/* Gloss line below LED */
+.stat-card::after {
+  content:'';
+  position:absolute;top:4px;left:5%;right:5%;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.1),transparent);
+  z-index:9;
+}
+
+.stat-card:hover {
+  border-color: rgba(14,243,192,0.25);
+  transform: translateY(-4px);
+  box-shadow:
+    0 1px 0 rgba(14,243,192,0.08) inset,
+    0 -1px 0 rgba(0,0,0,0.5) inset,
+    0 20px 50px rgba(0,0,0,0.5),
+    0 0 0 1px rgba(14,243,192,0.08);
+}
+
+.stat-card-bg { position:absolute;top:-20px;right:-20px;width:100px;height:100px;border-radius:50%;opacity:0.06;transition:opacity 0.3s; }
+.stat-card:hover .stat-card-bg { opacity:0.12; }
+
+.stat-icon { width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:15px;margin-bottom:18px;position:relative;z-index:1;box-shadow:0 4px 12px rgba(0,0,0,0.3); }
+.icon-teal { background:linear-gradient(135deg,rgba(14,243,192,0.2),rgba(8,120,90,0.15));color:var(--c-teal);border:1px solid rgba(14,243,192,0.2); }
+.icon-gold { background:linear-gradient(135deg,rgba(245,200,66,0.2),rgba(200,150,30,0.1));color:var(--c-gold);border:1px solid rgba(245,200,66,0.2); }
+.icon-blue { background:linear-gradient(135deg,rgba(59,130,246,0.2),rgba(37,99,235,0.1));color:#60a5fa;border:1px solid rgba(59,130,246,0.2); }
+.icon-violet { background:linear-gradient(135deg,rgba(167,139,250,0.2),rgba(124,58,237,0.1));color:#a78bfa;border:1px solid rgba(167,139,250,0.2); }
+
+.stat-trend { position:absolute;top:20px;right:20px;font-size:11px;font-weight:700;display:flex;align-items:center;gap:3px;padding:4px 8px;border-radius:20px; }
+.trend-up { color:var(--c-teal);background:rgba(14,243,192,0.1); }
+.trend-neu { color:var(--c-text-mid);background:rgba(107,158,144,0.1); }
+
+/* 3D BOLD stat value */
+.stat-value {
+  font-family: 'Black Ops One', cursive;
+  font-size: 36px; font-weight: 400;
+  letter-spacing: 2px; line-height: 1;
+  margin-bottom: 6px; position: relative; z-index: 1;
+  background: linear-gradient(180deg,
+    #ffffff 0%, #c8fff4 8%,
+    #0ef3c0 25%, #04a87a 45%,
+    #0ef3c0 65%, #9dfde0 82%,
+    #ffffff 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  filter:
+    drop-shadow(0 1px 0 rgba(0,0,0,0.99))
+    drop-shadow(0 2px 0 rgba(0,0,0,0.9))
+    drop-shadow(0 3px 0 rgba(0,60,40,0.65))
+    drop-shadow(0 4px 0 rgba(0,40,25,0.45))
+    drop-shadow(0 5px 8px rgba(0,0,0,0.8))
+    drop-shadow(0 0 20px rgba(14,243,192,0.45));
+}
+
+.stat-label { font-size:12px;color:var(--c-text-mid);font-weight:700;position:relative;z-index:1;letter-spacing:1px;font-family:'Rajdhani',sans-serif;text-transform:uppercase; }
+.stat-bar { margin-top:14px;height:3px;background:rgba(14,243,192,0.1);border-radius:2px;overflow:hidden;position:relative;z-index:1; }
+.stat-bar-fill { height:100%;background:linear-gradient(90deg,var(--c-teal-mid),var(--c-teal));border-radius:2px;box-shadow:0 0 6px var(--c-teal-glow);animation:bar-grow 1.2s cubic-bezier(0.2,0,0,1) forwards;transform-origin:left; }
+@keyframes bar-grow { from{transform:scaleX(0);}to{transform:scaleX(1);} }
+
+/* ═══════════════════════════════════════════
+   FEATURE CARDS — with RGB LED strip
+═══════════════════════════════════════════ */
+.feature-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-bottom:28px; }
+
+.feat-card {
+  background: linear-gradient(145deg, rgba(10,26,35,0.92) 0%, rgba(6,15,20,0.96) 100%);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-xl);
+  padding: 28px;
+  cursor: pointer; position: relative; overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.2,0,0,1);
+  box-shadow:
+    0 1px 0 rgba(14,243,192,0.05) inset,
+    0 -2px 0 rgba(0,0,0,0.5) inset,
+    0 12px 40px rgba(0,0,0,0.4);
+}
+
+.feat-card::before {
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(circle at 0% 100%,rgba(14,243,192,0.06) 0%,transparent 55%);
+  opacity:0;transition:opacity 0.3s;
+}
+.feat-card:hover::before { opacity:1; }
+.feat-card:hover {
+  border-color:rgba(14,243,192,0.3);transform:translateY(-5px);
+  box-shadow:0 1px 0 rgba(14,243,192,0.1) inset,0 -2px 0 rgba(0,0,0,0.6) inset,0 30px 70px rgba(0,0,0,0.6),0 0 0 1px rgba(14,243,192,0.08);
+}
+
+/* Gloss line below LED */
+.feat-card::after {
+  content:'';position:absolute;top:4px;left:5%;right:5%;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.08),transparent);
+  z-index:9;
+}
+
+.feat-num {
+  position:absolute;top:16px;right:22px;font-family:var(--f-play);font-style:italic;
+  font-size:78px;font-weight:900;color:rgba(14,243,192,0.04);line-height:1;letter-spacing:-4px;user-select:none;transition:color 0.3s;
+}
+.feat-card:hover .feat-num { color:rgba(14,243,192,0.08); }
+
+.feat-icon-wrap {
+  width:54px;height:54px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:22px;
+  margin-bottom:22px;position:relative;box-shadow:0 6px 20px rgba(0,0,0,0.4);
+}
+.feat-icon-wrap::after { content:'';position:absolute;inset:0;border-radius:16px;background:linear-gradient(135deg,rgba(255,255,255,0.12) 0%,transparent 60%); }
+.feat-icon-teal { background:linear-gradient(135deg,var(--c-teal-mid),#034d35);color:white;border:1px solid rgba(14,243,192,0.4);box-shadow:0 6px 20px rgba(14,243,192,0.2); }
+.feat-icon-gold { background:linear-gradient(135deg,#d4a820,#8a6010);color:white;border:1px solid rgba(245,200,66,0.4);box-shadow:0 6px 20px rgba(245,200,66,0.15); }
+.feat-icon-coral { background:linear-gradient(135deg,#e05040,#8a2010);color:white;border:1px solid rgba(240,100,80,0.4);box-shadow:0 6px 20px rgba(240,100,80,0.15); }
+
+/* 3D BOLD feat title */
+.feat-title {
+  font-family: 'Anton', sans-serif;
+  font-size: 24px; font-weight: 400;
+  color: #dff5ef;
+  margin-bottom: 10px; letter-spacing: 1px;
+  text-transform: uppercase;
+  text-shadow:
+    0 1px 0 rgba(0,0,0,0.99),
+    0 2px 0 rgba(0,0,0,0.92),
+    0 3px 0 rgba(0,0,0,0.8),
+    0 4px 0 rgba(0,40,28,0.6),
+    0 5px 0 rgba(0,25,18,0.4),
+    0 6px 10px rgba(0,0,0,0.7),
+    0 0 24px rgba(14,243,192,0.18);
+}
+.feat-desc { font-size:13px;line-height:1.65;color:var(--c-text-mid); }
+.feat-action { display:inline-flex;align-items:center;gap:6px;margin-top:20px;font-size:12px;font-weight:700;color:var(--c-teal);letter-spacing:0.3px;text-transform:uppercase;font-family:var(--f-mono); }
+.feat-action i { font-size:10px;transition:transform 0.2s; }
+.feat-card:hover .feat-action i { transform:translateX(4px); }
+
+/* ═══════════════════════════════════════════
+   INFO PANEL
+═══════════════════════════════════════════ */
+.info-panel {
+  background:linear-gradient(145deg,rgba(10,26,35,0.9) 0%,rgba(6,15,20,0.95) 100%);
+  border:1px solid var(--c-border);border-radius:var(--r-xl);overflow:hidden;
+  position:relative;
+  box-shadow:0 1px 0 rgba(14,243,192,0.05) inset,0 -2px 0 rgba(0,0,0,0.5) inset,0 12px 40px rgba(0,0,0,0.35);
+}
+.info-panel-header { padding:20px 26px;border-bottom:1px solid var(--c-border);display:flex;align-items:center;gap:14px;background:rgba(14,243,192,0.02);position:relative; }
+.info-panel-header::before { content:'';position:absolute;bottom:-1px;left:26px;width:60px;height:2px;background:var(--c-teal);box-shadow:0 0 8px var(--c-teal); }
+.iph-icon { width:38px;height:38px;border-radius:10px;background:rgba(14,243,192,0.1);border:1px solid rgba(14,243,192,0.2);display:flex;align-items:center;justify-content:center;color:var(--c-teal);font-size:14px; }
+.iph-title { font-family:var(--f-display);font-size:16px;font-weight:700;color:var(--c-text); }
+.iph-sub { font-size:11.5px;color:var(--c-text-mid);margin-top:1px; }
+.info-panel-body { padding:24px 26px; }
+
+/* ═══════════════════════════════════════════
+   PANEL
+═══════════════════════════════════════════ */
+.panel {
+  background:linear-gradient(145deg,rgba(10,26,35,0.92) 0%,rgba(6,15,20,0.96) 100%);
+  border:1px solid var(--c-border);border-radius:var(--r-xl);overflow:hidden;margin-bottom:22px;
+  position:relative;
+  box-shadow:0 1px 0 rgba(14,243,192,0.05) inset,0 -2px 0 rgba(0,0,0,0.5) inset,0 12px 40px rgba(0,0,0,0.35);
+}
+.panel-hd { padding:22px 28px;border-bottom:1px solid var(--c-border);background:rgba(14,243,192,0.025);display:flex;align-items:center;gap:14px;position:relative; }
+.panel-hd::after { content:'';position:absolute;bottom:-1px;left:28px;width:50px;height:2px;background:var(--c-teal);box-shadow:0 0 10px var(--c-teal-glow); }
+.panel-hd-icon { width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;box-shadow:0 4px 12px rgba(0,0,0,0.3); }
+.panel-hd-title {
+  font-family:'Black Ops One', cursive;font-size:17px;font-weight:400;letter-spacing:2px;
+  background:linear-gradient(180deg,#ffffff 0%,#c8fff4 10%,#0ef3c0 35%,#04a87a 60%,#9dfde0 85%,#ffffff 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  filter:
+    drop-shadow(0 1px 0 rgba(0,0,0,0.99))
+    drop-shadow(0 2px 0 rgba(0,0,0,0.88))
+    drop-shadow(0 3px 0 rgba(0,50,30,0.55))
+    drop-shadow(0 4px 8px rgba(0,0,0,0.6));
+}
+.panel-hd-sub { font-size:12px;color:var(--c-text-mid);margin-top:2px; }
+.panel-bd { padding:26px 28px; }
+
+/* ═══════════════════════════════════════════
+   FORM ELEMENTS
+═══════════════════════════════════════════ */
+.field-label { display:flex;align-items:center;gap:8px;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--c-text-mid);font-family:var(--f-mono);margin-bottom:10px; }
+.field-label i { color:var(--c-teal);font-size:11px; }
+textarea { width:100%;background:rgba(3,8,10,0.8);border:1px solid var(--c-border);border-radius:var(--r-md);color:var(--c-text);font-family:var(--f-mono);font-size:12.5px;padding:16px 18px;resize:vertical;line-height:1.7;transition:all 0.22s;outline:none;box-shadow:inset 0 2px 8px rgba(0,0,0,0.4),inset 0 1px 0 rgba(0,0,0,0.3); }
+textarea:focus { border-color:rgba(14,243,192,0.4);box-shadow:inset 0 2px 8px rgba(0,0,0,0.4),0 0 0 3px rgba(14,243,192,0.07);background:rgba(4,12,16,0.9); }
+textarea::placeholder { color:var(--c-text-dim); }
+
+/* ═══════════════════════════════════════════
+   BUTTONS
+═══════════════════════════════════════════ */
+.btn-row { display:flex;gap:10px;flex-wrap:wrap;margin-top:18px; }
+.btn { display:inline-flex;align-items:center;gap:8px;padding:11px 20px;border-radius:var(--r-sm);border:1px solid transparent;font-family:var(--f-body);font-size:13px;font-weight:700;cursor:pointer;transition:all 0.2s cubic-bezier(0.2,0,0,1);letter-spacing:0.3px;position:relative;overflow:hidden; }
+.btn::before { content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,0.07) 0%,transparent 60%);pointer-events:none; }
+.btn-primary { background:linear-gradient(135deg,var(--c-teal-mid),#046645);color:var(--c-bg);border-color:rgba(14,243,192,0.5);box-shadow:0 1px 0 rgba(255,255,255,0.12) inset,0 -2px 0 rgba(0,0,0,0.4) inset,0 6px 20px rgba(14,243,192,0.2); }
+.btn-primary:hover { background:linear-gradient(135deg,var(--c-teal),var(--c-teal-mid));box-shadow:0 1px 0 rgba(255,255,255,0.15) inset,0 -2px 0 rgba(0,0,0,0.4) inset,0 10px 30px rgba(14,243,192,0.3);transform:translateY(-2px); }
+.btn-ghost { background:rgba(14,243,192,0.06);color:var(--c-teal);border-color:var(--c-border);box-shadow:0 -1px 0 rgba(0,0,0,0.4) inset; }
+.btn-ghost:hover { background:rgba(14,243,192,0.12);border-color:var(--c-border-hi);transform:translateY(-1px); }
+.btn-danger { background:linear-gradient(135deg,rgba(180,30,20,0.8),rgba(120,10,5,0.8));color:#fca5a5;border-color:rgba(220,50,30,0.3);box-shadow:0 1px 0 rgba(255,100,80,0.1) inset,0 -2px 0 rgba(0,0,0,0.5) inset,0 4px 16px rgba(180,30,20,0.2); }
+.btn-danger:hover { background:linear-gradient(135deg,rgba(220,40,25,0.9),rgba(160,15,8,0.9));box-shadow:0 1px 0 rgba(255,100,80,0.15) inset,0 -2px 0 rgba(0,0,0,0.5) inset,0 8px 24px rgba(200,30,15,0.3);transform:translateY(-2px); }
+.btn-gold { background:linear-gradient(135deg,rgba(180,140,20,0.7),rgba(120,90,10,0.7));color:var(--c-gold);border-color:rgba(245,200,66,0.3);box-shadow:0 1px 0 rgba(255,220,100,0.1) inset,0 -2px 0 rgba(0,0,0,0.5) inset,0 4px 16px rgba(180,140,20,0.15); }
+.btn-gold:hover { background:linear-gradient(135deg,rgba(210,160,25,0.8),rgba(150,110,15,0.8));box-shadow:0 1px 0 rgba(255,220,100,0.15) inset,0 -2px 0 rgba(0,0,0,0.5) inset,0 8px 24px rgba(200,150,20,0.25);transform:translateY(-2px); }
+
+/* ═══════════════════════════════════════════
+   OUTPUT AREA
+═══════════════════════════════════════════ */
+.output-area { margin-top:22px;background:rgba(3,8,10,0.85);border:1px solid var(--c-border);border-radius:var(--r-md);padding:18px;max-height:440px;overflow-y:auto;font-size:13px;box-shadow:inset 0 3px 10px rgba(0,0,0,0.4); }
+.output-area:empty { display:none; }
+pre.code-output { margin-top:18px;background:rgba(2,5,7,0.95);border:1px solid var(--c-border);border-radius:var(--r-md);padding:20px;overflow:auto;font-family:var(--f-mono);font-size:11.5px;color:var(--c-text-mid);max-height:440px;line-height:1.65;box-shadow:inset 0 3px 10px rgba(0,0,0,0.4); }
+
+/* ═══════════════════════════════════════════
+   PREDICTION TABLE
+═══════════════════════════════════════════ */
+.prediction-table { width:100%;border-collapse:collapse;margin:12px 0;font-size:12px; }
+.prediction-table th { background:linear-gradient(135deg,rgba(14,243,192,0.15),rgba(8,100,70,0.1));color:var(--c-teal);padding:11px 10px;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid rgba(14,243,192,0.25);font-family:var(--f-mono); }
+.league-header { background:linear-gradient(135deg,rgba(0,80,55,0.4),rgba(0,40,28,0.6))!important;font-size:11px!important;font-weight:700!important;text-transform:uppercase!important;letter-spacing:3px!important;padding:14px!important;text-align:center;font-family:var(--f-display)!important;color:rgba(255,215,80,0.98)!important;text-shadow:0 1px 0 rgba(0,0,0,0.9),0 2px 4px rgba(0,0,0,0.6)!important; }
+.prediction-table td { padding:10px;border-bottom:1px solid rgba(14,243,192,0.05);color:var(--c-text);background:rgba(7,18,24,0.7);text-align:center;transition:all 0.15s; }
+.prediction-table tr:nth-child(even) td { background:rgba(5,13,18,0.7); }
+.prediction-table tr:hover td { background:rgba(14,243,192,0.04);color:var(--c-teal); }
+.score-cell { font-family:var(--f-mono);font-weight:600;color:var(--c-teal)!important; }
+
+/* ═══════════════════════════════════════════
+   MARQUEE
+═══════════════════════════════════════════ */
+.marquee-wrap { overflow:hidden;white-space:nowrap;background:linear-gradient(90deg,rgba(14,243,192,0.06) 0%,rgba(14,243,192,0.1) 50%,rgba(14,243,192,0.06) 100%);border:1px solid var(--c-border);border-radius:var(--r-sm);padding:12px 0;font-size:13px;font-weight:600;color:var(--c-teal);margin-bottom:22px;position:relative;box-shadow:0 2px 10px rgba(14,243,192,0.05); }
+.marquee-wrap p { display:inline-block;animation:mq-scroll 24s linear infinite;padding-left:100%;font-family:var(--f-body); }
+@keyframes mq-scroll { 0%{transform:translateX(0);}100%{transform:translateX(-100%);} }
+
+/* ═══════════════════════════════════════════
+   TOAST
+═══════════════════════════════════════════ */
+.toast { position:fixed;bottom:28px;right:28px;background:linear-gradient(135deg,rgba(10,26,35,0.97),rgba(6,16,22,0.98));border:1px solid var(--c-border-hi);border-radius:var(--r-md);padding:14px 18px;display:flex;align-items:center;gap:12px;font-size:13px;font-weight:500;color:var(--c-text);box-shadow:0 1px 0 rgba(14,243,192,0.1) inset,0 -1px 0 rgba(0,0,0,0.6) inset,0 20px 50px rgba(0,0,0,0.6),0 0 0 1px rgba(14,243,192,0.1);transform:translateY(16px) scale(0.97);opacity:0;transition:all 0.28s cubic-bezier(0.2,0,0,1);z-index:9999;backdrop-filter:blur(30px);min-width:240px; }
+.toast.show { transform:translateY(0) scale(1);opacity:1; }
+.toast-icon { color:var(--c-teal);font-size:16px;flex-shrink:0; }
+.toast-dot { width:4px;height:4px;background:var(--c-teal);border-radius:50%;margin-left:auto;flex-shrink:0; }
+
+/* ═══════════════════════════════════════════
+   SCROLLBAR
+═══════════════════════════════════════════ */
+::-webkit-scrollbar { width:5px;height:5px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:rgba(14,243,192,0.15);border-radius:3px; }
+::-webkit-scrollbar-thumb:hover { background:rgba(14,243,192,0.3); }
+
+/* ═══════════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════════ */
+@media(max-width:1100px) { .stat-grid{grid-template-columns:repeat(2,1fr);} .feature-grid{grid-template-columns:1fr 1fr;} }
+@media(max-width:900px) {
+  :root{--sidebar-w:76px;}
+  .sb-brand-text,.sb-brand-tag,.sb-version,.sb-section-label,.sb-item-text,.sb-item-badge,.sb-user-name,.sb-user-role,.sb-user-arrow{display:none;}
+  .sb-brand{padding:20px 0;display:flex;justify-content:center;} .sb-logo-wrap{margin:0;}
+  .sb-nav{padding:0 8px;} .sb-item{justify-content:center;padding:12px;gap:0;}
+  .sb-item.active::before{display:none;} .sb-footer{padding:14px 8px;} .sb-user{justify-content:center;padding:10px;}
+  .main{padding:20px;} .feature-grid{grid-template-columns:1fr;}
+}
+@media(max-width:600px) {
+  :root{--sidebar-w:0px;} .sidebar{display:none;} .stat-grid{grid-template-columns:1fr 1fr;}
+  .topbar{padding:0 18px;} .main{padding:16px;} .panel-bd,.info-panel-body{padding:18px;}
+}
+</style>
+</head>
+<body>
+
+<div class="bg-orb orb-1"></div>
+<div class="bg-orb orb-2"></div>
+<div class="bg-orb orb-3"></div>
+
+<div class="toast" id="toast">
+  <div class="toast-icon"><i class="fas fa-check-circle"></i></div>
+  <span id="toast-text">Berhasil!</span>
+  <div class="toast-dot"></div>
+</div>
+
+<!-- ═══ SIDEBAR ═══ -->
+<aside class="sidebar">
+  <div class="sb-brand">
+    <div class="sb-logo-wrap">
+      <div class="sb-logo-icon">⚽</div>⚽
+      <div class="sb-brand-text">
+        <div class="sb-brand-name">SiLubis</div>
+        <div class="sb-brand-tag">DASBOARD PREDIKSI BOLA</div>
+      </div>
+    </div>
+    <div class="sb-version"><div class="sb-version-dot"></div>v3.0 Premium</div>
+  </div>
+  <div class="sb-section-label">//</div>
+  <nav class="sb-nav">
+    <a class="sb-item active" href="#" onclick="goPage('dashboard');return false;">
+      <div class="sb-item-icon"><i class="fas fa-gauge-high"></i></div>
+      <div class="sb-item-text"><span class="sb-item-label">Dashboard Prediksi Bola </span><span class="sb-item-sub"> & stats</span></div>
+      <span class="sb-item-badge badge-new">Live</span>
+    </a>
+    <a class="sb-item" href="#" onclick="goPage('prediksi');return false;">
+      <div class="sb-item-icon"><i class="fas fa-futbol"></i></div>
+      <div class="sb-item-text"><span class="sb-item-label">Prediksi Bola</span><span class="sb-item-sub">Generate tabel HTML</span></div>
+      <span class="sb-item-badge badge-hot">Hot</span>
+    </a>
+    <a class="sb-item" href="#" onclick="goPage('pengisian');return false;">
+      <div class="sb-item-icon"><i class="fas fa-file-pen"></i></div>
+      <div class="sb-item-text"><span class="sb-item-label">Pengisian Teks</span><span class="sb-item-sub">Format jadwal</span></div>
+    </a>
+    <a class="sb-item" href="#" onclick="goPage('konversi');return false;">
+      <div class="sb-item-icon"><i class="fas fa-right-left"></i></div>
+      <div class="sb-item-text"><span class="sb-item-label">Konversi Skor</span><span class="sb-item-sub">– ke : otomatis</span></div>
+    </a>
+  </nav>
+  <div class="sb-footer">
+    <div class="sb-user">
+      <div class="sb-avatar">SL</div>
+      <div><div class="sb-user-name">SiLubis Admin</div><div class="sb-user-role">⚡ Premium Plan</div></div>
+      <div class="sb-user-arrow"><i class="fas fa-chevron-right"></i></div>
+    </div>
+  </div>
+</aside>
+
+<!-- ═══ CONTENT ═══ -->
+<div class="content">
+  <div class="topbar" style="position:sticky;">
+    <div class="topbar-left">
+      <div class="topbar-eyebrow" id="tb-eye"></div>
+      <div class="topbar-title" id="tb-title">Dashboard Prediksi Bola</div>
+    </div>
+    <div class="topbar-right">
+      <div class="tb-chip tb-chip-live"><div class="tb-live-dot"></div>Live</div>
+      <div class="tb-chip tb-chip-date" id="tb-date"></div>
+      <div class="tb-icon-btn" title="Refresh"><i class="fas fa-sync-alt"></i></div>
+    </div>
+  </div>
+
+  <div class="main">
+
+    <!-- PAGE: DASHBOARD -->
+    <div class="page active" id="page-dashboard">
+      <div class="stat-grid">
+        <!-- Card 1 -->
+        <div class="stat-card">
+          <div class="led-strip speed-2"></div>
+          <div class="stat-card-bg" style="background:radial-gradient(circle,rgba(14,243,192,1),transparent);"></div>
+          <div class="stat-icon icon-teal" style="margin-top:14px;"><i class="fas fa-chart-line"></i></div>
+          <div class="stat-trend trend-up"><i class="fas fa-arrow-up"></i> +12%</div>
+          <div class="stat-value">1,247</div>
+          <div class="stat-label">Prediksi Dibuat</div>
+          <div class="stat-bar"><div class="stat-bar-fill" style="width:78%"></div></div>
+        </div>
+        <!-- Card 2 -->
+        <div class="stat-card">
+          <div class="led-strip speed-3"></div>
+          <div class="stat-card-bg" style="background:radial-gradient(circle,rgba(245,200,66,1),transparent);"></div>
+          <div class="stat-icon icon-gold" style="margin-top:14px;"><i class="fas fa-bullseye"></i></div>
+          <div class="stat-trend trend-up"><i class="fas fa-arrow-up"></i> +3.2%</div>
+          <div class="stat-value" style="font-family:'Black Ops One',cursive;background:linear-gradient(180deg,#fff8e0 0%,#ffd700 20%,#b8860b 45%,#ffd700 70%,#fffde0 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 1px 0 rgba(0,0,0,0.99)) drop-shadow(0 2px 0 rgba(0,0,0,0.9)) drop-shadow(0 3px 0 rgba(80,40,0,0.6)) drop-shadow(0 4px 0 rgba(50,25,0,0.45)) drop-shadow(0 5px 8px rgba(0,0,0,0.8)) drop-shadow(0 0 20px rgba(245,200,66,0.5));">89.2%</div>
+          <div class="stat-label">Akurasi Prediksi</div>
+          <div class="stat-bar"><div class="stat-bar-fill" style="width:89%;background:linear-gradient(90deg,#c4900f,#f5c842);box-shadow:0 0 6px rgba(245,200,66,0.5)"></div></div>
+        </div>
+        <!-- Card 3 -->
+        <div class="stat-card">
+          <div class="led-strip speed-4"></div>
+          <div class="stat-card-bg" style="background:radial-gradient(circle,rgba(96,165,250,1),transparent);"></div>
+          <div class="stat-icon icon-blue" style="margin-top:14px;"><i class="fas fa-users"></i></div>
+          <div class="stat-trend trend-up"><i class="fas fa-arrow-up"></i> +8%</div>
+          <div class="stat-value" style="font-family:'Black Ops One',cursive;background:linear-gradient(180deg,#e0f0ff 0%,#60a5fa 25%,#1d4ed8 50%,#60a5fa 75%,#e0f0ff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 1px 0 rgba(0,0,0,0.99)) drop-shadow(0 2px 0 rgba(0,0,0,0.9)) drop-shadow(0 3px 0 rgba(10,30,100,0.6)) drop-shadow(0 4px 0 rgba(5,15,60,0.45)) drop-shadow(0 5px 8px rgba(0,0,0,0.8)) drop-shadow(0 0 20px rgba(96,165,250,0.5));">5,832</div>
+          <div class="stat-label">Pengguna Aktif</div>
+          <div class="stat-bar"><div class="stat-bar-fill" style="width:65%;background:linear-gradient(90deg,#1d4ed8,#60a5fa);box-shadow:0 0 6px rgba(96,165,250,0.4)"></div></div>
+        </div>
+        <!-- Card 4 -->
+        <div class="stat-card">
+          <div class="led-strip speed-5"></div>
+          <div class="stat-card-bg" style="background:radial-gradient(circle,rgba(167,139,250,1),transparent);"></div>
+          <div class="stat-icon icon-violet" style="margin-top:14px;"><i class="fas fa-futbol"></i></div>
+          <div class="stat-trend trend-neu"><i class="fas fa-minus"></i> Hari ini</div>
+          <div class="stat-value" style="font-family:'Black Ops One',cursive;background:linear-gradient(180deg,#ede9fe 0%,#a78bfa 25%,#6d28d9 50%,#a78bfa 75%,#ede9fe 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 1px 0 rgba(0,0,0,0.99)) drop-shadow(0 2px 0 rgba(0,0,0,0.9)) drop-shadow(0 3px 0 rgba(50,10,100,0.6)) drop-shadow(0 4px 0 rgba(30,5,70,0.45)) drop-shadow(0 5px 8px rgba(0,0,0,0.8)) drop-shadow(0 0 20px rgba(167,139,250,0.5));">324</div>
+          <div class="stat-label">Match Hari Ini</div>
+          <div class="stat-bar"><div class="stat-bar-fill" style="width:55%;background:linear-gradient(90deg,#6d28d9,#a78bfa);box-shadow:0 0 6px rgba(167,139,250,0.4)"></div></div>
+        </div>
+      </div>
+
+      <!-- Feature Cards -->
+      <div class="feature-grid">
+        <div class="feat-card" onclick="goPage('prediksi')">
+          <div class="led-strip speed-6"></div>
+          <div class="feat-num">01</div>
+          <div class="feat-icon-wrap feat-icon-teal" style="margin-top:14px;"><i class="fas fa-futbol"></i></div>
+          <div class="feat-title">Prediksi Bola</div>
+          <div class="feat-desc">Generate tabel prediksi elegan dengan tema hijau premium atau merah mewah 3D. Siap pakai di website manapun.</div>
+          <div class="feat-action">Buka Fitur <i class="fas fa-arrow-right"></i></div>
+        </div>
+        <div class="feat-card" onclick="goPage('pengisian')">
+          <div class="led-strip speed-7"></div>
+          <div class="feat-num">02</div>
+          <div class="feat-icon-wrap feat-icon-gold" style="margin-top:14px;"><i class="fas fa-file-pen"></i></div>
+          <div class="feat-title">Pengisian Teks</div>
+          <div class="feat-desc">Format jadwal pertandingan menjadi output yang rapi dan terstruktur hanya dalam hitungan detik.</div>
+          <div class="feat-action">Buka Fitur <i class="fas fa-arrow-right"></i></div>
+        </div>
+        <div class="feat-card" onclick="goPage('konversi')">
+          <div class="led-strip"></div>
+          <div class="feat-num">03</div>
+          <div class="feat-icon-wrap feat-icon-coral" style="margin-top:14px;"><i class="fas fa-right-left"></i></div>
+          <div class="feat-title">Konversi Skor</div>
+          <div class="feat-desc">Ubah format skor dari dash (–) ke titik dua (:) secara otomatis dan akurat untuk semua format input.</div>
+          <div class="feat-action">Buka Fitur <i class="fas fa-arrow-right"></i></div>
+        </div>
+      </div>
+
+      <!-- Info panel -->
+      <div class="info-panel">
+        <div class="led-strip speed-2" style="border-radius:var(--r-xl) var(--r-xl) 0 0;"></div>
+        <div class="info-panel-header" style="padding-top:24px;">
+          <div class="iph-icon"><i class="fas fa-circle-info"></i></div>
+          <div>
+            <div class="iph-title">Tentang SiLubis v3.0</div>
+            <div class="iph-sub">Football Prediction Engine — Premium RGB Edition</div>
+          </div>
+        </div>
+        <div class="info-panel-body" style="font-size:14px;line-height:1.85;color:var(--c-text-mid)">
+          Dashboard premium untuk mengelola prediksi dan data pertandingan sepak bola dari berbagai liga dunia.
+          Fitur generate HTML siap deploy dengan tema <span style="color:var(--c-teal);font-weight:700">hijau elegan</span> atau
+          <span style="color:#f87171;font-weight:700">merah ultra mewah 3D cinematic</span> yang dirancang untuk tampilan maksimal di semua perangkat.
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGE: PREDIKSI -->
+    <div class="page" id="page-prediksi">
+      <div class="marquee-wrap">
+        <p>⚽&nbsp;&nbsp;PREDIKSI BOLA TERUPDATE SETIAP HARI — Daftar di ANGKABET dan nikmati pengalaman taruhan premium!&nbsp;&nbsp;⚽&nbsp;&nbsp;Akurasi 89%+ berdasarkan analisis data mendalam.&nbsp;&nbsp;⚽</p>
+      </div>
+      <div class="panel">
+        <div class="led-strip speed-3" style="border-radius:var(--r-xl) var(--r-xl) 0 0;"></div>
+        <div class="panel-hd" style="padding-top:26px;">
+          <div class="panel-hd-icon feat-icon-teal" style="width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:15px;background:linear-gradient(135deg,var(--c-teal-mid),#034d35);color:white;border:1px solid rgba(14,243,192,0.4);"><i class="fas fa-futbol"></i></div>
+          <div>
+            <div class="panel-hd-title">Generate Tabel Prediksi</div>
+            <div class="panel-hd-sub">Masukkan data dan pilih tema output — Hijau Elegan atau Merah 3D Premium</div>
+          </div>
+        </div>
+        <div class="panel-bd">
+          <label class="field-label"><i class="fas fa-database"></i> Data Pertandingan</label>
+          <textarea id="inputData" rows="9" placeholder="Liga Inggris
+01/01 20:00 WIB Manchester United VS Liverpool 2 : 1
+02/01 18:30 WIB Chelsea VS Arsenal 1 : 1
+
+Liga Spanyol
+03/01 22:00 WIB Barcelona VS Real Madrid 3 : 2
+04/01 21:00 WIB Atletico Madrid VS Valencia 0 : 0"></textarea>
+          <div class="btn-row">
+            <button class="btn btn-primary" onclick="generateTable()"><i class="fas fa-magic"></i> Generate Tabel</button>
+            <button class="btn btn-ghost" onclick="showGreenHtml()"><i class="fas fa-leaf"></i> HTML Hijau</button>
+            <button class="btn btn-danger" onclick="showRedHtml()"><i class="fas fa-fire"></i> HTML Merah 3D</button>
+            <button class="btn btn-gold" onclick="copyHtml()"><i class="fas fa-copy"></i> Copy HTML</button>
+          </div>
+          <div id="outputTable" class="output-area"></div>
+          <pre id="htmlCode" class="code-output" style="display:none;"></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGE: PENGISIAN -->
+    <div class="page" id="page-pengisian">
+      <div class="panel">
+        <div class="led-strip speed-4" style="border-radius:var(--r-xl) var(--r-xl) 0 0;"></div>
+        <div class="panel-hd" style="padding-top:26px;">
+          <div class="panel-hd-icon" style="width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:15px;background:linear-gradient(135deg,#d4a820,#8a6010);color:white;border:1px solid rgba(245,200,66,0.4);"><i class="fas fa-file-pen"></i></div>
+          <div>
+            <div class="panel-hd-title">Pengisian Teks Premium</div>
+            <div class="panel-hd-sub">Format jadwal pertandingan secara otomatis dan profesional</div>
+          </div>
+        </div>
+        <div class="panel-bd">
+          <label class="field-label"><i class="fas fa-clipboard"></i> Input Jadwal</label>
+          <textarea id="jadwalInput" rows="8" placeholder="Liga Inggris
+01/01 20:00 WIB Manchester United VS Liverpool
+
+Liga Spanyol
+03/01 22:00 WIB Barcelona VS Real Madrid"></textarea>
+          <div class="btn-row">
+            <button class="btn btn-primary" onclick="prosesInput()"><i class="fas fa-cogs"></i> Proses Jadwal</button>
+            <button class="btn btn-ghost" onclick="copyJadwal()"><i class="fas fa-copy"></i> Salin Hasil</button>
+          </div>
+          <div id="jadwalOutput" class="output-area"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PAGE: KONVERSI -->
+    <div class="page" id="page-konversi">
+      <div class="panel">
+        <div class="led-strip speed-5" style="border-radius:var(--r-xl) var(--r-xl) 0 0;"></div>
+        <div class="panel-hd" style="padding-top:26px;">
+          <div class="panel-hd-icon" style="width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:15px;color:white;background:linear-gradient(135deg,#e05040,#8a2010);border:1px solid rgba(240,100,80,0.4);box-shadow:0 4px 12px rgba(0,0,0,0.3);"><i class="fas fa-right-left"></i></div>
+          <div>
+            <div class="panel-hd-title">Konversi Skor</div>
+            <div class="panel-hd-sub">Ubah format skor dari (–) menjadi (:) secara otomatis</div>
+          </div>
+        </div>
+        <div class="panel-bd">
+          <label class="field-label"><i class="fas fa-keyboard"></i> Input Data Pertandingan</label>
+          <textarea id="inputSkor" rows="8" placeholder="FRANCE LIGUE 2
+
+07/12 02:00 WIB [3] Lorient VS [16] Troyes 1 – 0
+07/12 02:00 WIB [18] FC Martigues VS [6] Guingamp 1 – 2"></textarea>
+          <div class="btn-row">
+            <button class="btn btn-primary" onclick="konversiSkor()"><i class="fas fa-sync-alt"></i> Konversi</button>
+            <button class="btn btn-ghost" onclick="copySkor()"><i class="fas fa-copy"></i> Salin Hasil</button>
+            <button class="btn btn-danger" onclick="clearSkor()"><i class="fas fa-trash-alt"></i> Hapus</button>
+          </div>
+          <div id="hasilKonversi" class="output-area" style="font-family:var(--f-mono);white-space:pre-wrap;font-size:12.5px;"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const DN=['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+const MN=['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
+const MNF=['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+function getDateShort(){const d=new Date();return `${DN[d.getDay()]}, ${String(d.getDate()).padStart(2,'0')} ${MN[d.getMonth()]} ${d.getFullYear()}`;}
+function getDateFull(){const d=new Date();return `${DN[d.getDay()]}, ${String(d.getDate()).padStart(2,'0')} ${MNF[d.getMonth()]} ${d.getFullYear()}`;}
+document.getElementById('tb-date').textContent=getDateShort();
+
+let toastTimer;
+function toast(msg){clearTimeout(toastTimer);const el=document.getElementById('toast');document.getElementById('toast-text').textContent=msg;el.classList.add('show');toastTimer=setTimeout(()=>el.classList.remove('show'),3000);}
+
+const pageMap={dashboard:{eye:'// ',title:'Dashboard Prediksi Bola'},prediksi:{eye:'// Prediksi',title:'Bola'},pengisian:{eye:'// Teks',title:'Pengisian'},konversi:{eye:'// Skor',title:'Konversi'}};
+function goPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
+  document.querySelectorAll('.sb-item')[Object.keys(pageMap).indexOf(id)].classList.add('active');
+  const t=pageMap[id];
+  document.getElementById('tb-eye').textContent=t.eye;
+  document.getElementById('tb-title').textContent=t.title;
+}
+
+function generateTable(){
+  const raw=document.getElementById('inputData').value.trim();
+  if(!raw){toast('Harap masukkan data prediksi!');return;}
+  const lines=raw.split('\n').filter(l=>l.trim());
+  let html='',inTable=false;
+  lines.forEach(line=>{
+    line=line.trim();
+    const isMatch=/^\d{2}\/\d{2} \d{2}:\d{2} WIB.+VS.+\d+\s?:\s?\d+$/i.test(line);
+    if(!isMatch){
+      if(inTable){html+='</tbody></table>';inTable=false;}
+      html+=`<table class="prediction-table"><tbody><tr><th colspan="3" class="league-header">${line}</th></tr><tr><th style="width:28%">Tanggal &amp; Waktu</th><th style="width:44%">Pertandingan</th><th style="width:28%">Skor</th></tr>`;
+      inTable=true;
+    } else {
+      const m=line.match(/^(\d{2}\/\d{2} \d{2}:\d{2} WIB)\s+(.+?)\s+VS\s+(.+?)\s+(\d+\s?:\s?\d+)$/i);
+      if(m){html+=`<tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">${m[1]}</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">${m[2].trim()} <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> ${m[3].trim()}</td><td class="score-cell">${m[4]}</td></tr>`;}
+    }
+  });
+  if(inTable) html+='</tbody></table>';
+  document.getElementById('outputTable').innerHTML=html;
+  document.getElementById('htmlCode').style.display='none';
+  toast('Tabel berhasil digenerate!');
+}
+
+function showGreenHtml(){
+  const tbl=document.getElementById('outputTable').innerHTML;
+  if(!tbl){toast('Generate tabel dulu!');return;}
+  showCode(buildGreenHtml(tbl,getDateFull()));
+  toast('HTML Hijau siap!');
+}
+
+function buildGreenHtml(tableContent,dateStr){
+return `<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prediksi Bola — Tema Hijau</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Manrope',sans-serif;background:#020608;color:#dff5ef;min-height:100vh;padding:22px;position:relative;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 60% 50% at 20% 10%,rgba(14,243,192,0.07) 0%,transparent 60%),radial-gradient(ellipse 50% 40% at 80% 90%,rgba(8,120,90,0.05) 0%,transparent 55%);pointer-events:none;z-index:0}
+.wrap{max-width:900px;margin:0 auto;position:relative;z-index:1}
+.date{text-align:center;font-family:'DM Mono',monospace;font-size:12px;color:#0ef3c0;background:rgba(14,243,192,0.06);border:1px solid rgba(14,243,192,0.15);border-radius:8px;padding:11px;margin-bottom:14px;letter-spacing:.5px}
+.marquee{overflow:hidden;white-space:nowrap;background:rgba(14,243,192,0.07);border:1px solid rgba(14,243,192,0.12);border-radius:8px;color:#0ef3c0;padding:11px 0;font-size:13px;font-weight:600;margin-bottom:20px}
+.marquee p{display:inline-block;animation:sc 24s linear infinite;padding-left:100%}
+@keyframes sc{0%{transform:translateX(0)}100%{transform:translateX(-100%)}}
+.prediction-table{width:100%;border-collapse:collapse;margin:14px 0;font-size:12px;border-radius:12px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,0.4)}
+.prediction-table th{background:linear-gradient(135deg,rgba(14,243,192,0.18),rgba(8,100,70,0.12));color:#0ef3c0;padding:12px 10px;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:1.2px;border-bottom:1px solid rgba(14,243,192,0.25);font-family:'DM Mono',monospace}
+.league-header{background:linear-gradient(135deg,rgba(0,70,48,0.5),rgba(0,35,24,0.7))!important;color:#f5c842!important;font-size:13px!important;font-weight:800!important;text-transform:uppercase!important;letter-spacing:2px!important;padding:15px!important;text-align:center;font-family:'Syne',sans-serif!important}
+.prediction-table td{padding:11px 10px;border-bottom:1px solid rgba(14,243,192,0.05);color:#dff5ef;background:rgba(7,18,24,0.75);text-align:center;transition:all .15s}
+.prediction-table tr:nth-child(even) td{background:rgba(4,12,18,0.75)}
+.prediction-table tr:hover td{background:rgba(14,243,192,0.05);color:#0ef3c0}
+.score-cell{font-family:'DM Mono',monospace;font-weight:600;color:#0ef3c0!important}
+@media(max-width:600px){.prediction-table{font-size:10px}.prediction-table th,.prediction-table td{padding:9px 7px}.league-header{font-size:11px!important;letter-spacing:1px!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="date">${dateStr}</div>
+<div class="marquee"><p>⚽&nbsp;&nbsp;PREDIKSI BOLA AKURAT &amp; TERUPDATE — Daftar di ANGKABET dan nikmati pengalaman taruhan premium!&nbsp;&nbsp;⚽</p></div>
+${tableContent}
+</div>
+</body>
+</html>`;}
+
+/* ══════════════════════════════════════════════
+   RED ULTRA LUXURY HTML — v3 FULL REBUILD
+══════════════════════════════════════════════ */
+function showRedHtml(){
+  const raw=document.getElementById('outputTable').innerHTML;
+  if(!raw){toast('Generate tabel dulu!');return;}
+  const tbl=raw
+    .replace(/class="prediction-table"/g,'class="rtable"')
+    .replace(/class="league-header"/g,'class="rheader"')
+    .replace(/class="score-cell"/g,'class="rscore"')
+    .replace(/color:var\(--c-text-dim\)/g,'color:rgba(255,255,255,0.2)')
+    .replace(/font-family:var\(--f-mono\)/g,"font-family:'JetBrains Mono',monospace")
+    .replace(/var\(--f-mono\)/g,"'JetBrains Mono',monospace");
+  showCode(buildRedHtml(tbl,getDateFull()));
+  toast('HTML Merah Ultra Mewah siap!');
+}
+
+function buildRedHtml(tableContent,dateStr){
+const yr=new Date().getFullYear();
+return `<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Prediksi Bola — Ultra Luxury Red Edition</title>
 <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Bebas+Neue&family=Anton&family=Orbitron:wght@700;800;900&family=Cinzel:wght@700;800;900&family=JetBrains+Mono:ital,wght@0,300;0,400;0,600;1,400&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -369,11 +1278,11 @@ body::after{
       <div class="stitle-main">
         <span class="stitle-ball">⚽</span> PREDIKSI BOLA ANGKABET <span class="stitle-ball">⚽</span>
       </div>
-      <span class="stitle-sub">TERUPDATE · TERPERCAYA · DAN AKURAT</span>
+      <span class="stitle-sub">TERUPDATE · TERPERCAYA · PREMIUM</span>
     </div>
     <div class="dline">
       <span class="ddot"></span>
-      Minggu, 22 Maret 2026
+      ${dateStr}
       <span class="ddot"></span>
     </div>
     <div class="mq-outer">
@@ -384,14 +1293,47 @@ body::after{
   </div>
 
   <!-- TABLES -->
-  <div class="twrap"><div class="led-bar s3"></div><table class="rtable"><tbody><tr><th colspan="3" class="rheader">ENGLISH PREMIER LEAGUE</th></tr><tr><th style="width:28%">Tanggal &amp; Waktu</th><th style="width:44%">Pertandingan</th><th style="width:28%">Skor</th></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 19:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Newcastle United <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Sunderland</td><td class="rscore">2 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 21:15 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Aston Villa <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> West Ham United</td><td class="rscore">2 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 21:15 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Tottenham Hotspur <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Nottingham Forest</td><td class="rscore">2 : 0</td></tr></tbody></table></div><div class="twrap"><div class="led-bar s3"></div><table class="rtable"><tbody><tr><th colspan="3" class="rheader">ITALY SERIE A</th></tr><tr><th style="width:28%">Tanggal &amp; Waktu</th><th style="width:44%">Pertandingan</th><th style="width:28%">Skor</th></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 18:30 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Como <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Pisa</td><td class="rscore">3 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 21:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Bologna <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Lazio</td><td class="rscore">1 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 21:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Atalanta <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Hellas Verona</td><td class="rscore">2 : 0</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 00:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">AS Roma <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Lecce</td><td class="rscore">2 : 0</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 02:45 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Fiorentina <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Inter Milan</td><td class="rscore">1 : 2</td></tr></tbody></table></div><div class="twrap"><div class="led-bar s3"></div><table class="rtable"><tbody><tr><th colspan="3" class="rheader">SPAIN LA LIGA</th></tr><tr><th style="width:28%">Tanggal &amp; Waktu</th><th style="width:44%">Pertandingan</th><th style="width:28%">Skor</th></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 20:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Barcelona <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Rayo Vallecano</td><td class="rscore">3 : 0</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 22:15 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Celta Vigo <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Alaves</td><td class="rscore">2 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 00:30 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Athletic Bilbao <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Real Betis</td><td class="rscore">1 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 03:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Real Madrid <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Atletico Madrid</td><td class="rscore">2 : 1</td></tr></tbody></table></div><div class="twrap"><div class="led-bar s3"></div><table class="rtable"><tbody><tr><th colspan="3" class="rheader">GERMANY BUNDESLIGA</th></tr><tr><th style="width:28%">Tanggal &amp; Waktu</th><th style="width:44%">Pertandingan</th><th style="width:28%">Skor</th></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 21:30 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">FSV Mainz 05 <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Eintracht Frankfurt</td><td class="rscore">1 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 23:30 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">St. Pauli <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> SC Freiburg</td><td class="rscore">1 : 2</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 01:30 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Augsburg <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> VfB Stuttgart</td><td class="rscore">1 : 2</td></tr></tbody></table></div><div class="twrap"><div class="led-bar s3"></div><table class="rtable"><tbody><tr><th colspan="3" class="rheader">ENGLISH LEAGUE CUP</th></tr><tr><th style="width:28%">Tanggal &amp; Waktu</th><th style="width:44%">Pertandingan</th><th style="width:28%">Skor</th></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 23:30 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Arsenal <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Manchester City</td><td class="rscore">1 : 2</td></tr></tbody></table></div><div class="twrap"><div class="led-bar s3"></div><table class="rtable"><tbody><tr><th colspan="3" class="rheader">FRANCE LIGUE 1</th></tr><tr><th style="width:28%">Tanggal &amp; Waktu</th><th style="width:44%">Pertandingan</th><th style="width:28%">Skor</th></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 21:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Lyon <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> AS Monaco</td><td class="rscore">1 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 23:15 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Paris FC <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Le Havre</td><td class="rscore">2 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 23:15 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Marseille <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Lille</td><td class="rscore">1 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 23:15 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Rennes <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Metz</td><td class="rscore">2 : 0</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 02:45 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Nantes <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Strasbourg</td><td class="rscore">1 : 1</td></tr></tbody></table></div><div class="twrap"><div class="led-bar s3"></div><table class="rtable"><tbody><tr><th colspan="3" class="rheader">JAPAN J1 100 YEAR VISION LEAGUE</th></tr><tr><th style="width:28%">Tanggal &amp; Waktu</th><th style="width:44%">Pertandingan</th><th style="width:28%">Skor</th></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 11:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Shimizu S-Pulse <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Sanfrecce Hiroshima</td><td class="rscore">1 : 2</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 12:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Kyoto Sanga <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Nagoya Grampus</td><td class="rscore">1 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 12:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Tokyo Verdy <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> FC Tokyo</td><td class="rscore">0 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 13:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Kawasaki Frontale <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Yokohama F.Marinos</td><td class="rscore">2 : 2</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 13:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Cerezo Osaka <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Vissel Kobe</td><td class="rscore">1 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 13:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Kashima Antlers <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> JEF United Ichihara Chiba</td><td class="rscore">2 : 0</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 14:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Kashiwa Reysol <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Mito Hollyhock</td><td class="rscore">2 : 0</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 14:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Urawa Red Diamonds <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Machida Zelvia</td><td class="rscore">1 : 1</td></tr></tbody></table></div><div class="twrap"><div class="led-bar s3"></div><table class="rtable"><tbody><tr><th colspan="3" class="rheader">JAPAN J2/J3 100 YEAR VISION LEAGUE</th></tr><tr><th style="width:28%">Tanggal &amp; Waktu</th><th style="width:44%">Pertandingan</th><th style="width:28%">Skor</th></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 12:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Renofa Yamaguchi <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Giravanz Kitakyushu</td><td class="rscore">2 : 0</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 12:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Montedio Yamagata <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Vegalta Sendai</td><td class="rscore">1 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 12:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Tochigi SC <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Tochigi City FC</td><td class="rscore">1 : 0</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 12:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Kamatamare Sanuki <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Nara Club</td><td class="rscore">1 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 12:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Zweigen Kanazawa <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> FC Osaka</td><td class="rscore">2 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 12:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Gainare Tottori <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Kagoshima United</td><td class="rscore">0 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 12:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">FC Imabari <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Tokushima Vortis</td><td class="rscore">1 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 12:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Ehime FC <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Kochi United SC</td><td class="rscore">1 : 0</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 12:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Reilac Shiga FC <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Sagan Tosu</td><td class="rscore">0 : 2</td></tr></tbody></table></div><div class="twrap"><div class="led-bar s3"></div><table class="rtable"><tbody><tr><th colspan="3" class="rheader">NETHERLANDS EREDIVISIE</th></tr><tr><th style="width:28%">Tanggal &amp; Waktu</th><th style="width:44%">Pertandingan</th><th style="width:28%">Skor</th></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 18:15 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">NEC Nijmegen <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> SC Heerenveen</td><td class="rscore">2 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 20:30 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">FC Utrecht <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Go Ahead Eagles</td><td class="rscore">2 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 20:30 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Feyenoord <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Ajax</td><td class="rscore">2 : 2</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 22:45 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Groningen <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> AZ Alkmaar</td><td class="rscore">1 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 22:45 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Telstar <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> PSV Eindhoven</td><td class="rscore">0 : 3</td></tr></tbody></table></div><div class="twrap"><div class="led-bar s3"></div><table class="rtable"><tbody><tr><th colspan="3" class="rheader">NORWAY ELITESERIEN</th></tr><tr><th style="width:28%">Tanggal &amp; Waktu</th><th style="width:44%">Pertandingan</th><th style="width:28%">Skor</th></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 20:30 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Rosenborg <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Valerenga</td><td class="rscore">2 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 23:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Brann <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Tromso</td><td class="rscore">2 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 23:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Fredrikstad <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> KFUM Oslo</td><td class="rscore">1 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 23:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Sandefjord <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Sarpsborg 08</td><td class="rscore">1 : 2</td></tr></tbody></table></div><div class="twrap"><div class="led-bar s3"></div><table class="rtable"><tbody><tr><th colspan="3" class="rheader">DENMARK SUPER LEAGUE PLAYOFF</th></tr><tr><th style="width:28%">Tanggal &amp; Waktu</th><th style="width:44%">Pertandingan</th><th style="width:28%">Skor</th></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 20:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Randers FC <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Silkeborg</td><td class="rscore">2 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 20:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Nordsjaelland <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Sonderjyske</td><td class="rscore">3 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 22:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">FC Copenhagen <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Fredericia</td><td class="rscore">4 : 0</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 00:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">AGF Aarhus <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Brondby IF</td><td class="rscore">1 : 2</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 02:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Viborg <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Midtjylland</td><td class="rscore">1 : 2</td></tr></tbody></table></div><div class="twrap"><div class="led-bar s3"></div><table class="rtable"><tbody><tr><th colspan="3" class="rheader">NORWAY CUP</th></tr><tr><th style="width:28%">Tanggal &amp; Waktu</th><th style="width:44%">Pertandingan</th><th style="width:28%">Skor</th></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 01:15 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Bodo Glimt <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Lillestrom</td><td class="rscore">3 : 0</td></tr></tbody></table></div><div class="twrap"><div class="led-bar s3"></div><table class="rtable"><tbody><tr><th colspan="3" class="rheader">LIGA PORTUGAL</th></tr><tr><th style="width:28%">Tanggal &amp; Waktu</th><th style="width:44%">Pertandingan</th><th style="width:28%">Skor</th></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 22:30 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Estoril Praia <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Rio Ave</td><td class="rscore">2 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 01:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Alverca <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Sporting Lisbon</td><td class="rscore">0 : 3</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 03:30 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Sporting Braga <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Porto</td><td class="rscore">1 : 2</td></tr></tbody></table></div><div class="twrap"><div class="led-bar s3"></div><table class="rtable"><tbody><tr><th colspan="3" class="rheader">SWISS SUPER LEAGUE</th></tr><tr><th style="width:28%">Tanggal &amp; Waktu</th><th style="width:44%">Pertandingan</th><th style="width:28%">Skor</th></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 20:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">FC Winterthur <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Basel</td><td class="rscore">0 : 2</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 22:30 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Luzern <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Lausanne Sports</td><td class="rscore">2 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 22:30 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Young Boys <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Lugano</td><td class="rscore">3 : 1</td></tr></tbody></table></div><div class="twrap"><div class="led-bar s3"></div><table class="rtable"><tbody><tr><th colspan="3" class="rheader">SPAIN LA LIGA 2</th></tr><tr><th style="width:28%">Tanggal &amp; Waktu</th><th style="width:44%">Pertandingan</th><th style="width:28%">Skor</th></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 20:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Burgos CF <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Cordoba CF</td><td class="rscore">1 : 0</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 22:15 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Real Sociedad B <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Granada</td><td class="rscore">1 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 22:15 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">CD Mirandes <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Real Valladolid</td><td class="rscore">0 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 00:30 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">UD Las Palmas <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Sporting Gijon</td><td class="rscore">2 : 1</td></tr></tbody></table></div><div class="twrap"><div class="led-bar s3"></div><table class="rtable"><tbody><tr><th colspan="3" class="rheader">BELGIUM FIRST DIVISION A</th></tr><tr><th style="width:28%">Tanggal &amp; Waktu</th><th style="width:44%">Pertandingan</th><th style="width:28%">Skor</th></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 00:30 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Anderlecht <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Cercle Brugge</td><td class="rscore">2 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 00:30 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">FCV Dender EH <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> KAA Gent</td><td class="rscore">1 : 2</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 00:30 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Zulte Waregem <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Sporting Charleroi</td><td class="rscore">1 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 00:30 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Standard Liege <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> KVC Westerlo</td><td class="rscore">2 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 00:30 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">RAAL La Louviere <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> KRC Genk</td><td class="rscore">1 : 2</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 00:30 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Oud-Heverlee Leuven <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Royal Antwerp</td><td class="rscore">1 : 2</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 00:30 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Club Brugge <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> KV Mechelen</td><td class="rscore">3 : 0</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 00:30 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Sint-Truidense <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Union Saint-Gilloise</td><td class="rscore">0 : 1</td></tr></tbody></table></div><div class="twrap"><div class="led-bar s3"></div><table class="rtable"><tbody><tr><th colspan="3" class="rheader">RUSSIA PREMIER LEAGUE</th></tr><tr><th style="width:28%">Tanggal &amp; Waktu</th><th style="width:44%">Pertandingan</th><th style="width:28%">Skor</th></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 17:45 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">FC Orenburg <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Spartak Moscow</td><td class="rscore">1 : 2</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 20:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Dynamo Moscow <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Zenit St. Petersburg</td><td class="rscore">1 : 2</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 20:30 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">PFC Krylia Sovetov <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Rubin Kazan</td><td class="rscore">1 : 0</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 23:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Lokomotiv Moscow <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Akron Tolyatti</td><td class="rscore">2 : 0</td></tr></tbody></table></div><div class="twrap"><div class="led-bar s3"></div><table class="rtable"><tbody><tr><th colspan="3" class="rheader">ITALY SERIE B</th></tr><tr><th style="width:28%">Tanggal &amp; Waktu</th><th style="width:44%">Pertandingan</th><th style="width:28%">Skor</th></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 21:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">SSC Bari <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Carrarese</td><td class="rscore">1 : 0</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 21:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Empoli <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Pescara</td><td class="rscore">2 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 21:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">FC Sudtirol <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Frosinone</td><td class="rscore">1 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 23:15 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Sampdoria <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Avellino</td><td class="rscore">2 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 01:30 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Virtus Entella <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> AC Reggiana 1919</td><td class="rscore">1 : 0</td></tr></tbody></table></div><div class="twrap"><div class="led-bar s3"></div><table class="rtable"><tbody><tr><th colspan="3" class="rheader">SCOTLAND PREMIERSHIP</th></tr><tr><th style="width:28%">Tanggal &amp; Waktu</th><th style="width:44%">Pertandingan</th><th style="width:28%">Skor</th></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 19:30 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Dundee United <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Celtic FC</td><td class="rscore">0 : 2</td></tr></tbody></table></div><div class="twrap"><div class="led-bar s3"></div><table class="rtable"><tbody><tr><th colspan="3" class="rheader">AUSTRIA BUNDESLIGA PLAYOFF</th></tr><tr><th style="width:28%">Tanggal &amp; Waktu</th><th style="width:44%">Pertandingan</th><th style="width:28%">Skor</th></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 20:30 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">TSV Hartberg <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> FK Austria Wien</td><td class="rscore">1 : 2</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 23:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">SK Rapid Wien <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> LASK Linz</td><td class="rscore">1 : 1</td></tr></tbody></table></div><div class="twrap"><div class="led-bar s3"></div><table class="rtable"><tbody><tr><th colspan="3" class="rheader">THAILAND LEAGUE 1</th></tr><tr><th style="width:28%">Tanggal &amp; Waktu</th><th style="width:44%">Pertandingan</th><th style="width:28%">Skor</th></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 18:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Chiangrai United <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Port FC</td><td class="rscore">1 : 2</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 18:30 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">PT Prachuap FC <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Bangkok United</td><td class="rscore">1 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 18:30 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">BG Pathum United <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Ratchaburi Mitr Phol</td><td class="rscore">2 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 19:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Buriram United <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Muangthong United</td><td class="rscore">3 : 0</td></tr></tbody></table></div><div class="twrap"><div class="led-bar s3"></div><table class="rtable"><tbody><tr><th colspan="3" class="rheader">KOREA K-LEAGUE 1</th></tr><tr><th style="width:28%">Tanggal &amp; Waktu</th><th style="width:44%">Pertandingan</th><th style="width:28%">Skor</th></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 12:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Ulsan HD FC <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Gimcheon Sangmu FC</td><td class="rscore">2 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 12:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">FC Seoul <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Gwangju FC</td><td class="rscore">2 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 14:30 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Gangwon FC <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Jeju SK FC</td><td class="rscore">2 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 14:30 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Pohang Steelers <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Bucheon FC 1995</td><td class="rscore">2 : 0</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 14:30 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">FC Anyang <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Incheon United</td><td class="rscore">1 : 1</td></tr></tbody></table></div><div class="twrap"><div class="led-bar s3"></div><table class="rtable"><tbody><tr><th colspan="3" class="rheader">KOREA K-LEAGUE 2</th></tr><tr><th style="width:28%">Tanggal &amp; Waktu</th><th style="width:44%">Pertandingan</th><th style="width:28%">Skor</th></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 12:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Busan I.Park <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Daegu FC</td><td class="rscore">1 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 12:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Hwaseong FC <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Yongin FC</td><td class="rscore">2 : 0</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 14:30 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Gyeongnam FC <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Gimpo FC</td><td class="rscore">1 : 1</td></tr></tbody></table></div><div class="twrap"><div class="led-bar s3"></div><table class="rtable"><tbody><tr><th colspan="3" class="rheader">POLAND EKSTRAKLASA</th></tr><tr><th style="width:28%">Tanggal &amp; Waktu</th><th style="width:44%">Pertandingan</th><th style="width:28%">Skor</th></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 18:15 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Korona Kielce <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Arka Gdynia</td><td class="rscore">2 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 20:45 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Lech Poznan <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Bruk-Bet Termalica Nieciecza</td><td class="rscore">3 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 23:30 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Widzew Lodz <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Gornik Zabrze</td><td class="rscore">2 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 02:15 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Legia Warszawa <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Rakow Czestochowa</td><td class="rscore">1 : 1</td></tr></tbody></table></div><div class="twrap"><div class="led-bar s3"></div><table class="rtable"><tbody><tr><th colspan="3" class="rheader">NETHERLANDS EERSTE DIVISIE</th></tr><tr><th style="width:28%">Tanggal &amp; Waktu</th><th style="width:44%">Pertandingan</th><th style="width:28%">Skor</th></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 18:15 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">De Graafschap <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> ADO Den Haag</td><td class="rscore">1 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 22:45 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">MVV Maastricht <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Willem II</td><td class="rscore">1 : 2</td></tr></tbody></table></div><div class="twrap"><div class="led-bar s3"></div><table class="rtable"><tbody><tr><th colspan="3" class="rheader">EGYPT PREMIER LEAGUE PLAYOFF</th></tr><tr><th style="width:28%">Tanggal &amp; Waktu</th><th style="width:44%">Pertandingan</th><th style="width:28%">Skor</th></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 22:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">ZED FC <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Tala'ea El Gaish</td><td class="rscore">1 : 0</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 01:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Al Ittihad Alexandria <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Pharco FC</td><td class="rscore">2 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 01:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Kahrabaa Ismailia SC <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Modern Sport FC</td><td class="rscore">1 : 1</td></tr></tbody></table></div><div class="twrap"><div class="led-bar s3"></div><table class="rtable"><tbody><tr><th colspan="3" class="rheader">GREECE SUPER LEAGUE</th></tr><tr><th style="width:28%">Tanggal &amp; Waktu</th><th style="width:44%">Pertandingan</th><th style="width:28%">Skor</th></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 00:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">AEK Athens <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> AE Kifisia FC</td><td class="rscore">3 : 0</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 00:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Aris Thessaloniki <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> OFI Crete</td><td class="rscore">2 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 00:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Asteras Tripolis <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Panathinaikos</td><td class="rscore">0 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 00:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Levadiakos <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Atromitos</td><td class="rscore">1 : 0</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 00:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Olympiacos <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> AE Larissa</td><td class="rscore">3 : 0</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 00:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Panetolikos <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Panserraikos FC</td><td class="rscore">1 : 0</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 00:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Volos NFC <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> PAOK</td><td class="rscore">0 : 2</td></tr></tbody></table></div><div class="twrap"><div class="led-bar s3"></div><table class="rtable"><tbody><tr><th colspan="3" class="rheader">AUSTRIA 2ND LIGA</th></tr><tr><th style="width:28%">Tanggal &amp; Waktu</th><th style="width:44%">Pertandingan</th><th style="width:28%">Skor</th></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 16:30 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">KSV 1919 <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> SKU Ertl Glas Amstetten</td><td class="rscore">1 : 1</td></tr></tbody></table></div><div class="twrap"><div class="led-bar s3"></div><table class="rtable"><tbody><tr><th colspan="3" class="rheader">ROMANIA SUPERLIGA PLAYOFF</th></tr><tr><th style="width:28%">Tanggal &amp; Waktu</th><th style="width:44%">Pertandingan</th><th style="width:28%">Skor</th></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 00:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">AFC Hermannstadt <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Botosani</td><td class="rscore">1 : 0</td></tr></tbody></table></div><div class="twrap"><div class="led-bar s3"></div><table class="rtable"><tbody><tr><th colspan="3" class="rheader">LIGA PORTUGAL 2</th></tr><tr><th style="width:28%">Tanggal &amp; Waktu</th><th style="width:44%">Pertandingan</th><th style="width:28%">Skor</th></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 18:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Felgueiras <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> SC Uniao Torreense</td><td class="rscore">1 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 21:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Feirense <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Sporting Lisbon B</td><td class="rscore">2 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 22:30 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Leixoes <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Pacos de Ferreira</td><td class="rscore">1 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 01:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Benfica B <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Sporting Farense</td><td class="rscore">1 : 2</td></tr></tbody></table></div><div class="twrap"><div class="led-bar s3"></div><table class="rtable"><tbody><tr><th colspan="3" class="rheader">GERMANY 3RD LEAGUE</th></tr><tr><th style="width:28%">Tanggal &amp; Waktu</th><th style="width:44%">Pertandingan</th><th style="width:28%">Skor</th></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 19:30 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">TSG Hoffenheim Am <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> VfL Osnabruck</td><td class="rscore">1 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 22:30 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">MSV Duisburg <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> TSV 1860 Munchen</td><td class="rscore">2 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 01:30 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Viktoria Koln <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Rot-Weiss Essen</td><td class="rscore">1 : 1</td></tr></tbody></table></div><div class="twrap"><div class="led-bar s3"></div><table class="rtable"><tbody><tr><th colspan="3" class="rheader">CYPRUS 1ST DIV PLAYOFF</th></tr><tr><th style="width:28%">Tanggal &amp; Waktu</th><th style="width:44%">Pertandingan</th><th style="width:28%">Skor</th></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 21:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">AEL Limassol <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Ethnikos Achnas</td><td class="rscore">2 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 22:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Pafos FC <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Apollon Limassol</td><td class="rscore">2 : 0</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 00:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">AEK Larnaca <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> APOEL Nicosia</td><td class="rscore">1 : 1</td></tr></tbody></table></div><div class="twrap"><div class="led-bar s3"></div><table class="rtable"><tbody><tr><th colspan="3" class="rheader">POLAND 1ST LIGA</th></tr><tr><th style="width:28%">Tanggal &amp; Waktu</th><th style="width:44%">Pertandingan</th><th style="width:28%">Skor</th></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 20:30 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Stal Mielec <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> KS Wieczysta Krakow</td><td class="rscore">1 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 23:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Pogon Siedlce <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Chrobry Glogow</td><td class="rscore">1 : 0</td></tr></tbody></table></div><div class="twrap"><div class="led-bar s3"></div><table class="rtable"><tbody><tr><th colspan="3" class="rheader">CROATIA SUPERLIGA</th></tr><tr><th style="width:28%">Tanggal &amp; Waktu</th><th style="width:44%">Pertandingan</th><th style="width:28%">Skor</th></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 21:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Slaven Koprivnica <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Osijek</td><td class="rscore">1 : 2</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 23:45 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">HNK Gorica <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Rijeka</td><td class="rscore">0 : 1</td></tr></tbody></table></div><div class="twrap"><div class="led-bar s3"></div><table class="rtable"><tbody><tr><th colspan="3" class="rheader">SLOVAKIA SUPER LEAGUE PLAYOFF</th></tr><tr><th style="width:28%">Tanggal &amp; Waktu</th><th style="width:44%">Pertandingan</th><th style="width:28%">Skor</th></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 21:30 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">MFK Skalica <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> KFC Komarno</td><td class="rscore">2 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 00:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Slovan Bratislava <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> FK Zeleziarne Podbrezova</td><td class="rscore">3 : 0</td></tr></tbody></table></div><div class="twrap"><div class="led-bar s3"></div><table class="rtable"><tbody><tr><th colspan="3" class="rheader">RUSSIA FIRST LEAGUE</th></tr><tr><th style="width:28%">Tanggal &amp; Waktu</th><th style="width:44%">Pertandingan</th><th style="width:28%">Skor</th></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 12:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">SKA-Khabarovsk <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Arsenal Tula</td><td class="rscore">1 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 17:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Sokol Saratov <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> FC Neftekhimik Nizhnekamsk</td><td class="rscore">0 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 18:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Ural Yekaterinburg <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Yenisey Krasnoyarsk</td><td class="rscore">2 : 0</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 20:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">FK Spartak Kostroma <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Shinnik Yaroslavl</td><td class="rscore">1 : 1</td></tr></tbody></table></div><div class="twrap"><div class="led-bar s3"></div><table class="rtable"><tbody><tr><th colspan="3" class="rheader">BULGARIA FIRST PROFESSIONAL LEAGUE</th></tr><tr><th style="width:28%">Tanggal &amp; Waktu</th><th style="width:44%">Pertandingan</th><th style="width:28%">Skor</th></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 17:30 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">FC Montana <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Beroe Stara Zagora</td><td class="rscore">1 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 20:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">CSKA Sofia <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Dobrudzha Dobrich</td><td class="rscore">2 : 0</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 22:30 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Botev Vratsa <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Lokomotiv Plovdiv</td><td class="rscore">1 : 2</td></tr></tbody></table></div><div class="twrap"><div class="led-bar s3"></div><table class="rtable"><tbody><tr><th colspan="3" class="rheader">HUNGARY LIGA NB 1</th></tr><tr><th style="width:28%">Tanggal &amp; Waktu</th><th style="width:44%">Pertandingan</th><th style="width:28%">Skor</th></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 20:30 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Puskas Akademia <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Debreceni VSC</td><td class="rscore">2 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 22:45 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Kazincbarcika SC <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> ETO FC Gyor</td><td class="rscore">0 : 2</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 01:15 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Kisvarda FC <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Ferencvarosi</td><td class="rscore">0 : 2</td></tr></tbody></table></div><div class="twrap"><div class="led-bar s3"></div><table class="rtable"><tbody><tr><th colspan="3" class="rheader">SWISS CHALLENGE LEAGUE</th></tr><tr><th style="width:28%">Tanggal &amp; Waktu</th><th style="width:44%">Pertandingan</th><th style="width:28%">Skor</th></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 23:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Wil 1900 <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Etoile Carouge FC</td><td class="rscore">1 : 2</td></tr></tbody></table></div><div class="twrap"><div class="led-bar s3"></div><table class="rtable"><tbody><tr><th colspan="3" class="rheader">SWEDEN CUP</th></tr><tr><th style="width:28%">Tanggal &amp; Waktu</th><th style="width:44%">Pertandingan</th><th style="width:28%">Skor</th></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 19:30 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Hammarby <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> IK Sirius FK</td><td class="rscore">2 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 22:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Mjallby <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> GAIS Goteborg</td><td class="rscore">2 : 1</td></tr></tbody></table></div><div class="twrap"><div class="led-bar s3"></div><table class="rtable"><tbody><tr><th colspan="3" class="rheader">TURKIYE 1ST LIG</th></tr><tr><th style="width:28%">Tanggal &amp; Waktu</th><th style="width:44%">Pertandingan</th><th style="width:28%">Skor</th></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 17:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Vanspor FK <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Sariyer SK</td><td class="rscore">1 : 0</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 20:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Igdir FK <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Corum FK</td><td class="rscore">1 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 20:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Istanbulspor <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Bodrum FK</td><td class="rscore">1 : 2</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 23:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Esenler Erokspor <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Erzurumspor FK</td><td class="rscore">2 : 1</td></tr></tbody></table></div><div class="twrap"><div class="led-bar s3"></div><table class="rtable"><tbody><tr><th colspan="3" class="rheader">SLOVENIA PRVA LIGA</th></tr><tr><th style="width:28%">Tanggal &amp; Waktu</th><th style="width:44%">Pertandingan</th><th style="width:28%">Skor</th></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 23:30 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">NK Celje <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> ND Primorje</td><td class="rscore">3 : 0</td></tr></tbody></table></div><div class="twrap"><div class="led-bar s3"></div><table class="rtable"><tbody><tr><th colspan="3" class="rheader">AUSTRALIA WOMEN A LEAGUE</th></tr><tr><th style="width:28%">Tanggal &amp; Waktu</th><th style="width:44%">Pertandingan</th><th style="width:28%">Skor</th></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 12:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Western Sydney Wanderers [w] <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Melbourne City [w]</td><td class="rscore">0 : 2</td></tr></tbody></table></div><div class="twrap"><div class="led-bar s3"></div><table class="rtable"><tbody><tr><th colspan="3" class="rheader">LIGA PORTUGAL 3 PLAYOFF</th></tr><tr><th style="width:28%">Tanggal &amp; Waktu</th><th style="width:44%">Pertandingan</th><th style="width:28%">Skor</th></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 20:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Amarante <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Vitoria Guimaraes B</td><td class="rscore">1 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 22:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Fafe <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> USC Paredes</td><td class="rscore">2 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 22:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Caldas <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Lusitano Ginasio</td><td class="rscore">1 : 0</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 22:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Atletico Clube de Portugal <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Amora</td><td class="rscore">2 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 00:30 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Trofense <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Academica Coimbra</td><td class="rscore">1 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 03:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">CD Mafra <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> CF Os Belenenses</td><td class="rscore">1 : 0</td></tr></tbody></table></div><div class="twrap"><div class="led-bar s3"></div><table class="rtable"><tbody><tr><th colspan="3" class="rheader">SOUTH AFRICA PREMIERSHIP</th></tr><tr><th style="width:28%">Tanggal &amp; Waktu</th><th style="width:44%">Pertandingan</th><th style="width:28%">Skor</th></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 20:30 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">TS Galaxy FC <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Orlando Pirates</td><td class="rscore">0 : 2</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 20:30 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Siwelele FC <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Orbit College FC</td><td class="rscore">2 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 20:30 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Golden Arrows <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Sekhukhune United FC</td><td class="rscore">1 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 22:30 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Durban City FC <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Richards Bay FC</td><td class="rscore">2 : 1</td></tr></tbody></table></div><div class="twrap"><div class="led-bar s3"></div><table class="rtable"><tbody><tr><th colspan="3" class="rheader">ENGLISH WOMEN SUPER LEAGUE</th></tr><tr><th style="width:28%">Tanggal &amp; Waktu</th><th style="width:44%">Pertandingan</th><th style="width:28%">Skor</th></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 19:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Brighton &amp; Hove Albion [w] <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Liverpool [w]</td><td class="rscore">1 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 21:45 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Leicester City [w] <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Aston Villa [w]</td><td class="rscore">1 : 2</td></tr></tbody></table></div><div class="twrap"><div class="led-bar s3"></div><table class="rtable"><tbody><tr><th colspan="3" class="rheader">USA MAJOR LEAGUE SOCCER</th></tr><tr><th style="width:28%">Tanggal &amp; Waktu</th><th style="width:44%">Pertandingan</th><th style="width:28%">Skor</th></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 00:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">FC Cincinnati <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> CF Montreal</td><td class="rscore">2 : 0</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 00:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">New York City FC <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Inter Miami CF</td><td class="rscore">1 : 2</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 01:30 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Minnesota United FC <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Seattle Sounders</td><td class="rscore">1 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 03:45 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Portland Timbers <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> L.A Galaxy</td><td class="rscore">2 : 2</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 06:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">San Diego FC <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Real Salt Lake</td><td class="rscore">2 : 1</td></tr></tbody></table></div><div class="twrap"><div class="led-bar s3"></div><table class="rtable"><tbody><tr><th colspan="3" class="rheader">BRAZIL SERIE A</th></tr><tr><th style="width:28%">Tanggal &amp; Waktu</th><th style="width:44%">Pertandingan</th><th style="width:28%">Skor</th></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 02:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Remo PA <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Bahia EC BA</td><td class="rscore">1 : 2</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 02:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Cruzeiro MG <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Santos SP</td><td class="rscore">2 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 02:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Vasco da Gama RJ <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Gremio Porto Alegrense</td><td class="rscore">1 : 0</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 02:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Atl Paranaense <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Coritiba PR</td><td class="rscore">2 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 04:30 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Vitoria BA <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Mirassol SP</td><td class="rscore">1 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 04:30 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Internacional RS <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Chapecoense SC</td><td class="rscore">2 : 0</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 06:30 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Corinthians SP <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Flamengo RJ</td><td class="rscore">1 : 2</td></tr></tbody></table></div><div class="twrap"><div class="led-bar s3"></div><table class="rtable"><tbody><tr><th colspan="3" class="rheader">ARGENTINA LIGA PROFESIONAL</th></tr><tr><th style="width:28%">Tanggal &amp; Waktu</th><th style="width:44%">Pertandingan</th><th style="width:28%">Skor</th></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 01:30 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">CA Sarmiento <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Aldosivi</td><td class="rscore">1 : 0</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 03:45 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Estudiantes de Rio Cuarto <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> CA River Plate</td><td class="rscore">0 : 2</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 06:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Boca Juniors <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Instituto</td><td class="rscore">2 : 0</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 08:15 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Independiente Rivadavia <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Rosario Central</td><td class="rscore">1 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 08:15 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Argentinos Juniors <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> CA Platense</td><td class="rscore">2 : 1</td></tr></tbody></table></div><div class="twrap"><div class="led-bar s3"></div><table class="rtable"><tbody><tr><th colspan="3" class="rheader">MEXICO PRIMERA DIVISION</th></tr><tr><th style="width:28%">Tanggal &amp; Waktu</th><th style="width:44%">Pertandingan</th><th style="width:28%">Skor</th></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 06:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Pachuca <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Deportivo Toluca</td><td class="rscore">1 : 2</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 06:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Santos Laguna <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Puebla FC</td><td class="rscore">1 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 08:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">FC Juarez <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Tigres UANL</td><td class="rscore">0 : 1</td></tr></tbody></table></div><div class="twrap"><div class="led-bar s3"></div><table class="rtable"><tbody><tr><th colspan="3" class="rheader">BRAZIL SERIE B</th></tr><tr><th style="width:28%">Tanggal &amp; Waktu</th><th style="width:44%">Pertandingan</th><th style="width:28%">Skor</th></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 02:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Nautico Capibaribe <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Criciuma EC</td><td class="rscore">1 : 0</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 02:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Avai FC <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> EC Juventude</td><td class="rscore">1 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 04:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Athletic Club MG <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Ponte Preta</td><td class="rscore">2 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 04:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Goias GO <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> America Mineiro</td><td class="rscore">1 : 0</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 06:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Gremio Novorizontino <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Londrina EC</td><td class="rscore">2 : 0</td></tr></tbody></table></div><div class="twrap"><div class="led-bar s3"></div><table class="rtable"><tbody><tr><th colspan="3" class="rheader">MEXICO LIGA DE EXPANSION</th></tr><tr><th style="width:28%">Tanggal &amp; Waktu</th><th style="width:44%">Pertandingan</th><th style="width:28%">Skor</th></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 01:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Leones Negros <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Mineros de Zacatecas</td><td class="rscore">2 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 06:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">CD Tapatio <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Atletico Morelia</td><td class="rscore">1 : 0</td></tr></tbody></table></div><div class="twrap"><div class="led-bar s3"></div><table class="rtable"><tbody><tr><th colspan="3" class="rheader">COLOMBIA PRIMERA A</th></tr><tr><th style="width:28%">Tanggal &amp; Waktu</th><th style="width:44%">Pertandingan</th><th style="width:28%">Skor</th></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 04:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Alianza Valledupar <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Deportivo Cali</td><td class="rscore">1 : 2</td></tr></tbody></table></div><div class="twrap"><div class="led-bar s3"></div><table class="rtable"><tbody><tr><th colspan="3" class="rheader">ECUADOR LIGA PRO SERIE A</th></tr><tr><th style="width:28%">Tanggal &amp; Waktu</th><th style="width:44%">Pertandingan</th><th style="width:28%">Skor</th></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 03:30 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Barcelona Guayaquil <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> CD Universidad Catolica Quito</td><td class="rscore">2 : 1</td></tr></tbody></table></div><div class="twrap"><div class="led-bar s3"></div><table class="rtable"><tbody><tr><th colspan="3" class="rheader">PARAGUAY PRIMERA DIVISION</th></tr><tr><th style="width:28%">Tanggal &amp; Waktu</th><th style="width:44%">Pertandingan</th><th style="width:28%">Skor</th></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 04:30 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Sportivo San Lorenzo <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Club Nacional Asuncion</td><td class="rscore">1 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 06:30 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Sportivo Luqueno <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Sportivo 2 de Mayo</td><td class="rscore">2 : 1</td></tr></tbody></table></div><div class="twrap"><div class="led-bar s3"></div><table class="rtable"><tbody><tr><th colspan="3" class="rheader">PERU LIGA 1</th></tr><tr><th style="width:28%">Tanggal &amp; Waktu</th><th style="width:44%">Pertandingan</th><th style="width:28%">Skor</th></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 01:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">UTC Cajamarca <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Alianza Atletico Sullana</td><td class="rscore">2 : 0</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 03:30 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Atletico Grau <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Deportivo Garcilaso</td><td class="rscore">1 : 0</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 06:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Sport Boys Association <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Sport Huancayo</td><td class="rscore">2 : 1</td></tr></tbody></table></div><div class="twrap"><div class="led-bar s3"></div><table class="rtable"><tbody><tr><th colspan="3" class="rheader">URUGUAY PRIMERA DIVISION</th></tr><tr><th style="width:28%">Tanggal &amp; Waktu</th><th style="width:44%">Pertandingan</th><th style="width:28%">Skor</th></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">22/03 20:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Juventud Las Piedras <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Albion Montevideo</td><td class="rscore">1 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 02:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Progreso Montevideo <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> CA Boston River</td><td class="rscore">1 : 0</td></tr></tbody></table></div><div class="twrap"><div class="led-bar s3"></div><table class="rtable"><tbody><tr><th colspan="3" class="rheader">COSTA RICA PRIMERA DIVISION</th></tr><tr><th style="width:28%">Tanggal &amp; Waktu</th><th style="width:44%">Pertandingan</th><th style="width:28%">Skor</th></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 04:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Perez Zeledon <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> CS Cartagines</td><td class="rscore">1 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 04:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">AD San Carlos <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Deportivo Saprissa</td><td class="rscore">1 : 2</td></tr></tbody></table></div><div class="twrap"><div class="led-bar s3"></div><table class="rtable"><tbody><tr><th colspan="3" class="rheader">ARGENTINA PRIMERA NACIONAL</th></tr><tr><th style="width:28%">Tanggal &amp; Waktu</th><th style="width:44%">Pertandingan</th><th style="width:28%">Skor</th></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 02:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">CA San Telmo <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Colon de Santa Fe</td><td class="rscore">1 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 02:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">CA Temperley <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> CA Atlanta</td><td class="rscore">2 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 02:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Chacarita Juniors <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Atletico Rafaela</td><td class="rscore">1 : 0</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 02:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">CA Patronato <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> CA Colegiales</td><td class="rscore">2 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 03:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">CA Guemes <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Agropecuario Argentino</td><td class="rscore">1 : 0</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 03:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">CA Central Norte <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> CA All Boys</td><td class="rscore">1 : 1</td></tr><tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px">23/03 05:00 WIB</td><td style="font-weight:700;font-size:13px;letter-spacing:0.3px">Deportivo Maipu <span style="font-family:'Black Ops One',cursive;font-size:16px;font-weight:400;letter-spacing:3px;color:#0ef3c0;padding:0 12px;text-shadow:0 1px 0 rgba(0,0,0,0.99),0 2px 0 rgba(0,0,0,0.9),0 3px 0 rgba(0,60,40,0.6),0 4px 6px rgba(0,0,0,0.7),0 0 12px rgba(14,243,192,0.5)">VS</span> Ferrocarril Midland</td><td class="rscore">2 : 1</td></tr></tbody></table></div>
+  ${tableContent.replace(/<table /g,'<div class="twrap"><div class="led-bar s3"></div><table ').replace(/<\/table>/g,'</table></div>')}
 
   <!-- FOOTER -->
   <div class="fcard">
     <div class="led-bar s4"></div>
-    <div class="ftxt" style="padding-top:10px;">© 2026 Angkabet &mdash; All Rights Reserved &mdash; Premium Football Prediction</div>
+    <div class="ftxt" style="padding-top:10px;">© ${yr} Angkabet &mdash; All Rights Reserved &mdash; Premium Football Prediction</div>
   </div>
 
 </div>
+</body>
+</html>`;}
+
+function showCode(code){const pre=document.getElementById('htmlCode');pre.textContent=code;pre.style.display='block';}
+function copyHtml(){const code=document.getElementById('htmlCode').textContent;if(!code){toast('Tidak ada HTML untuk disalin!');return;}navigator.clipboard.writeText(code).then(()=>toast('HTML berhasil disalin!')).catch(()=>toast('Gagal menyalin!'));}
+
+function prosesInput(){
+  const raw=document.getElementById('jadwalInput').value.trim();
+  if(!raw){toast('Harap isi input!');return;}
+  const blocs=raw.split(/\n{2,}/);
+  let html='';
+  blocs.forEach(bloc=>{
+    const lines=bloc.trim().split('\n');
+    html+=`<div style="color:var(--c-teal);font-family:var(--f-display);font-size:15px;font-weight:700;margin:18px 0 10px;letter-spacing:-.2px">${lines[0].trim()}</div>`;
+    lines.slice(1).forEach(match=>{
+      match=match.replace(/\bvs\b/gi,'VS').replace(/(\d+)\s*-\s*(\d+)/g,'$1 : $2');
+      html+=`<div style="padding:8px 0;border-bottom:1px solid rgba(14,243,192,0.06);font-size:13px;color:var(--c-text-mid)">${match}</div>`;
+    });
+  });
+  document.getElementById('jadwalOutput').innerHTML=html;
+  toast('Jadwal berhasil diproses!');
+}
+function copyJadwal(){const t=document.getElementById('jadwalOutput').innerText;if(!t.trim()){toast('Tidak ada hasil!');return;}navigator.clipboard.writeText(t).then(()=>toast('Disalin!'));}
+
+function konversiSkor(){
+  const raw=document.getElementById('inputSkor').value.trim();
+  if(!raw){toast('Harap isi input!');return;}
+  document.getElementById('hasilKonversi').textContent=raw.replace(/(\d+)\s*[–—-]\s*(\d+)/g,'$1 : $2');
+  toast('Skor berhasil dikonversi!');
+}
+function copySkor(){const t=document.getElementById('hasilKonversi').textContent;if(!t.trim()){toast('Tidak ada hasil!');return;}navigator.clipboard.writeText(t).then(()=>toast('Disalin!'));}
+function clearSkor(){document.getElementById('inputSkor').value='';document.getElementById('hasilKonversi').textContent='';toast('Dihapus!');}
+</script>
 </body>
 </html>
