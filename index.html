@@ -7,48 +7,37 @@
 <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Bebas+Neue&family=Anton&family=Orbitron:wght@700;800;900&family=Cinzel:wght@700;800;900&family=JetBrains+Mono:ital,wght@0,300;0,400;0,600;1,400&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
-/* ═══════════════════════════════════════════
-   ROOT TOKENS
-═══════════════════════════════════════════ */
 :root {
   --c-bg:        #020608;
   --c-surface:   #060f12;
   --c-panel:     #07131a;
   --c-card:      #0a1a23;
   --c-lift:      #0d2030;
-
   --c-teal:      #0ef3c0;
   --c-teal-mid:  #08c99a;
   --c-teal-dim:  #056648;
   --c-teal-ghost:rgba(14,243,192,0.06);
   --c-teal-glow: rgba(14,243,192,0.22);
-
   --c-gold:      #f5c842;
   --c-gold-dim:  rgba(245,200,66,0.12);
   --c-gold-glow: rgba(245,200,66,0.3);
-
   --c-border:    rgba(14,243,192,0.1);
   --c-border-hi: rgba(14,243,192,0.3);
-
   --c-text:      #dff5ef;
   --c-text-mid:  #6b9e90;
   --c-text-dim:  #2a4a3e;
-
   --r-xl: 24px;
   --r-lg: 18px;
   --r-md: 12px;
   --r-sm: 8px;
-
   --f-display: 'Black Ops One', cursive;
   --f-body:    'Rajdhani', sans-serif;
   --f-mono:    'JetBrains Mono', monospace;
   --f-serif:   'Bebas Neue', cursive;
   --f-play:    'Anton', sans-serif;
-
   --sidebar-w: 288px;
   --topbar-h:  72px;
 }
-
 *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
 html { scroll-behavior: smooth; }
 body {
@@ -58,16 +47,12 @@ body {
   min-height: 100vh;
   overflow-x: hidden;
 }
-
 .bg-orb { position: fixed; border-radius: 50%; filter: blur(120px); pointer-events: none; z-index: 0; }
 .orb-1 { width:600px;height:600px;background:radial-gradient(circle,rgba(14,243,192,0.07) 0%,transparent 70%);top:-200px;left:-100px;animation:orb-drift 18s ease-in-out infinite alternate; }
 .orb-2 { width:500px;height:500px;background:radial-gradient(circle,rgba(8,120,90,0.06) 0%,transparent 70%);bottom:-150px;right:-50px;animation:orb-drift 22s ease-in-out infinite alternate-reverse; }
 .orb-3 { width:300px;height:300px;background:radial-gradient(circle,rgba(245,200,66,0.04) 0%,transparent 70%);top:40%;left:30%;animation:orb-drift 30s ease-in-out infinite alternate; }
 @keyframes orb-drift { 0%{transform:translate(0,0) scale(1);}100%{transform:translate(40px,30px) scale(1.1);} }
 
-/* ═══════════════════════════════════════════
-   RGB LED STRIP KEYFRAMES
-═══════════════════════════════════════════ */
 @keyframes rgb-flow {
   0%   { background-position: 0% 50%; box-shadow: 0 0 12px 3px rgba(255,0,80,0.7), 0 0 30px rgba(255,0,80,0.3); }
   14%  { background-position: 14% 50%; box-shadow: 0 0 12px 3px rgba(255,100,0,0.7), 0 0 30px rgba(255,100,0,0.3); }
@@ -78,13 +63,10 @@ body {
   85%  { background-position: 85% 50%; box-shadow: 0 0 12px 3px rgba(255,0,180,0.7), 0 0 30px rgba(255,0,180,0.3); }
   100% { background-position: 100% 50%; box-shadow: 0 0 12px 3px rgba(255,0,80,0.7), 0 0 30px rgba(255,0,80,0.3); }
 }
-
 @keyframes rgb-flow-slow {
   0%   { background-position: 0% 50%; }
   100% { background-position: 400% 50%; }
 }
-
-/* LED Strip component */
 .led-strip {
   position: absolute;
   top: 0; left: 0; right: 0;
@@ -99,7 +81,6 @@ body {
   animation: rgb-flow 3s linear infinite;
   z-index: 10;
 }
-
 .led-strip::after {
   content: '';
   position: absolute;
@@ -110,8 +91,6 @@ body {
   opacity: 0.8;
   animation: rgb-flow 3s linear infinite;
 }
-
-/* Varied speeds per card */
 .led-strip.speed-2 { animation-duration: 2.5s; }
 .led-strip.speed-2::after { animation-duration: 2.5s; }
 .led-strip.speed-3 { animation-duration: 3.5s; }
@@ -125,9 +104,7 @@ body {
 .led-strip.speed-7 { animation-duration: 5s; }
 .led-strip.speed-7::after { animation-duration: 5s; }
 
-/* ═══════════════════════════════════════════
-   SIDEBAR
-═══════════════════════════════════════════ */
+/* SIDEBAR */
 .sidebar {
   position: fixed; top:0;left:0;
   width: var(--sidebar-w); height: 100vh;
@@ -143,7 +120,6 @@ body {
   background:linear-gradient(90deg,transparent,var(--c-teal),transparent);
   opacity:0.5;
 }
-
 .sb-brand { padding:32px 28px 24px; border-bottom:1px solid var(--c-border); position:relative; }
 .sb-logo-wrap { display:flex;align-items:center;gap:14px; margin-bottom:4px; }
 .sb-logo-icon {
@@ -154,7 +130,6 @@ body {
   box-shadow: 0 0 0 1px rgba(14,243,192,0.3), 0 4px 20px rgba(14,243,192,0.2), 0 8px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.15);
 }
 .sb-logo-icon::after { content:'';position:absolute;inset:0;border-radius:14px;background:linear-gradient(135deg,rgba(255,255,255,0.12) 0%,transparent 60%); }
-
 .sb-brand-text { flex:1; }
 .sb-brand-name {
   font-family:'Black Ops One', cursive; font-size:19px;font-weight:400;letter-spacing:3px;line-height:1;
@@ -163,7 +138,6 @@ body {
   filter:drop-shadow(0 1px 0 rgba(0,0,0,0.95)) drop-shadow(0 2px 0 rgba(0,0,0,0.8)) drop-shadow(0 3px 6px rgba(0,0,0,0.6)) drop-shadow(0 0 14px rgba(14,243,192,0.25));
 }
 .sb-brand-tag { font-size:10px;font-weight:500;color:var(--c-teal-mid);letter-spacing:1.5px;text-transform:uppercase;margin-top:4px; }
-
 .sb-version {
   display:inline-flex;align-items:center;gap:5px;
   background:var(--c-teal-ghost);border:1px solid var(--c-border);border-radius:20px;
@@ -171,7 +145,6 @@ body {
 }
 .sb-version-dot { width:5px;height:5px;background:var(--c-teal);border-radius:50%;box-shadow:0 0 5px var(--c-teal);animation:pulse-live 1.8s infinite; }
 @keyframes pulse-live { 0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.4;transform:scale(0.7);} }
-
 .sb-section-label {
   padding:22px 28px 10px;
   font-size:9px;font-weight:700;letter-spacing:3px;text-transform:uppercase;
@@ -182,7 +155,6 @@ body {
   content:'';flex:1;height:1px;
   background:linear-gradient(90deg,rgba(14,243,192,0.12),transparent);
 }
-
 .sb-nav { padding:0 14px; }
 .sb-item {
   display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:var(--r-md);
@@ -227,7 +199,6 @@ body {
 .sb-item-badge { font-size:9px;font-weight:700;padding:2px 7px;border-radius:10px;letter-spacing:0.5px; }
 .badge-new { background:rgba(14,243,192,0.15);color:var(--c-teal);border:1px solid rgba(14,243,192,0.25); }
 .badge-hot { background:rgba(245,80,50,0.15);color:#f87171;border:1px solid rgba(245,80,50,0.25); }
-
 .sb-footer { margin-top:auto;padding:20px 14px;border-top:1px solid var(--c-border); }
 .sb-user {
   display:flex;align-items:center;gap:12px;padding:12px 14px;
@@ -243,11 +214,8 @@ body {
 .sb-user-role { font-size:11px;color:var(--c-teal);font-weight:500; }
 .sb-user-arrow { margin-left:auto;color:var(--c-text-dim);font-size:11px; }
 
-/* ═══════════════════════════════════════════
-   MAIN CONTENT
-═══════════════════════════════════════════ */
+/* MAIN */
 .content { margin-left:var(--sidebar-w);min-height:100vh;position:relative;z-index:1; }
-
 .topbar {
   height:var(--topbar-h);display:flex;align-items:center;justify-content:space-between;
   padding:0 36px;background:rgba(3,8,10,0.7);backdrop-filter:blur(30px);
@@ -261,8 +229,6 @@ body {
   animation:rgb-flow-slow 8s linear infinite;
   z-index:5;
 }
-
-.topbar-left {}
 .topbar-eyebrow { font-size:9px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--c-teal);font-family:var(--f-mono);margin-bottom:2px;text-shadow:0 0 10px rgba(14,243,192,0.4); }
 .topbar-title {
   font-family:'Black Ops One', cursive;font-size:24px;font-weight:400;letter-spacing:3px;line-height:1;
@@ -279,7 +245,6 @@ body {
     drop-shadow(0 5px 10px rgba(0,0,0,0.7))
     drop-shadow(0 0 22px rgba(14,243,192,0.35));
 }
-
 .topbar-right { display:flex;align-items:center;gap:12px; }
 .tb-chip { display:flex;align-items:center;gap:7px;padding:8px 16px;border-radius:40px;font-size:12px;font-weight:600;border:1px solid;cursor:default; }
 .tb-chip-live { background:rgba(14,243,192,0.07);border-color:rgba(14,243,192,0.25);color:var(--c-teal); }
@@ -288,19 +253,13 @@ body {
 .tb-icon-btn { width:38px;height:38px;border-radius:var(--r-sm);background:var(--c-teal-ghost);border:1px solid var(--c-border);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--c-text-mid);font-size:13px;transition:all 0.2s; }
 .tb-icon-btn:hover { border-color:var(--c-border-hi);color:var(--c-teal);background:rgba(14,243,192,0.1); }
 
-/* ═══════════════════════════════════════════
-   PAGES
-═══════════════════════════════════════════ */
 .main { padding:32px 36px; }
 .page { display:none;animation:page-in 0.35s cubic-bezier(0.2,0,0,1) forwards; }
 .page.active { display:block; }
 @keyframes page-in { from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);} }
 
-/* ═══════════════════════════════════════════
-   STAT CARDS
-═══════════════════════════════════════════ */
+/* STAT CARDS */
 .stat-grid { display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px; }
-
 .stat-card {
   background: linear-gradient(145deg, rgba(10,26,35,0.9) 0%, rgba(7,19,26,0.95) 100%);
   border: 1px solid var(--c-border);
@@ -359,9 +318,7 @@ body {
 .stat-bar-fill { height:100%;background:linear-gradient(90deg,var(--c-teal-mid),var(--c-teal));border-radius:2px;box-shadow:0 0 6px var(--c-teal-glow);animation:bar-grow 1.2s cubic-bezier(0.2,0,0,1) forwards;transform-origin:left; }
 @keyframes bar-grow { from{transform:scaleX(0);}to{transform:scaleX(1);} }
 
-/* ═══════════════════════════════════════════
-   FEATURE CARDS
-═══════════════════════════════════════════ */
+/* FEATURE CARDS */
 .feature-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-bottom:28px; }
 .feat-card {
   background: linear-gradient(145deg, rgba(10,26,35,0.92) 0%, rgba(6,15,20,0.96) 100%);
@@ -392,9 +349,7 @@ body {
 .feat-action i { font-size:10px;transition:transform 0.2s; }
 .feat-card:hover .feat-action i { transform:translateX(4px); }
 
-/* ═══════════════════════════════════════════
-   INFO PANEL
-═══════════════════════════════════════════ */
+/* INFO PANEL */
 .info-panel { background:linear-gradient(145deg,rgba(10,26,35,0.9) 0%,rgba(6,15,20,0.95) 100%);border:1px solid var(--c-border);border-radius:var(--r-xl);overflow:hidden;position:relative;box-shadow:0 1px 0 rgba(14,243,192,0.05) inset,0 -2px 0 rgba(0,0,0,0.5) inset,0 12px 40px rgba(0,0,0,0.35); }
 .info-panel-header { padding:20px 26px;border-bottom:1px solid var(--c-border);display:flex;align-items:center;gap:14px;background:rgba(14,243,192,0.02);position:relative; }
 .info-panel-header::before { content:'';position:absolute;bottom:-1px;left:26px;width:60px;height:2px;background:var(--c-teal);box-shadow:0 0 8px var(--c-teal); }
@@ -403,9 +358,7 @@ body {
 .iph-sub { font-size:11.5px;color:var(--c-text-mid);margin-top:1px; }
 .info-panel-body { padding:24px 26px; }
 
-/* ═══════════════════════════════════════════
-   PANEL
-═══════════════════════════════════════════ */
+/* PANEL */
 .panel { background:linear-gradient(145deg,rgba(10,26,35,0.92) 0%,rgba(6,15,20,0.96) 100%);border:1px solid var(--c-border);border-radius:var(--r-xl);overflow:hidden;margin-bottom:22px;position:relative;box-shadow:0 1px 0 rgba(14,243,192,0.05) inset,0 -2px 0 rgba(0,0,0,0.5) inset,0 12px 40px rgba(0,0,0,0.35); }
 .panel-hd { padding:22px 28px;border-bottom:1px solid var(--c-border);background:rgba(14,243,192,0.025);display:flex;align-items:center;gap:14px;position:relative; }
 .panel-hd::after { content:'';position:absolute;bottom:-1px;left:28px;width:50px;height:2px;background:var(--c-teal);box-shadow:0 0 10px var(--c-teal-glow); }
@@ -414,18 +367,14 @@ body {
 .panel-hd-sub { font-size:12px;color:var(--c-text-mid);margin-top:2px; }
 .panel-bd { padding:26px 28px; }
 
-/* ═══════════════════════════════════════════
-   FORM ELEMENTS
-═══════════════════════════════════════════ */
+/* FORMS */
 .field-label { display:flex;align-items:center;gap:8px;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--c-text-mid);font-family:var(--f-mono);margin-bottom:10px; }
 .field-label i { color:var(--c-teal);font-size:11px; }
 textarea { width:100%;background:rgba(3,8,10,0.8);border:1px solid var(--c-border);border-radius:var(--r-md);color:var(--c-text);font-family:var(--f-mono);font-size:12.5px;padding:16px 18px;resize:vertical;line-height:1.7;transition:all 0.22s;outline:none;box-shadow:inset 0 2px 8px rgba(0,0,0,0.4),inset 0 1px 0 rgba(0,0,0,0.3); }
 textarea:focus { border-color:rgba(14,243,192,0.4);box-shadow:inset 0 2px 8px rgba(0,0,0,0.4),0 0 0 3px rgba(14,243,192,0.07);background:rgba(4,12,16,0.9); }
 textarea::placeholder { color:var(--c-text-dim); }
 
-/* ═══════════════════════════════════════════
-   BUTTONS
-═══════════════════════════════════════════ */
+/* BUTTONS */
 .btn-row { display:flex;gap:10px;flex-wrap:wrap;margin-top:18px; }
 .btn { display:inline-flex;align-items:center;gap:8px;padding:11px 20px;border-radius:var(--r-sm);border:1px solid transparent;font-family:var(--f-body);font-size:13px;font-weight:700;cursor:pointer;transition:all 0.2s cubic-bezier(0.2,0,0,1);letter-spacing:0.3px;position:relative;overflow:hidden; }
 .btn::before { content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,0.07) 0%,transparent 60%);pointer-events:none; }
@@ -438,16 +387,12 @@ textarea::placeholder { color:var(--c-text-dim); }
 .btn-gold { background:linear-gradient(135deg,rgba(180,140,20,0.7),rgba(120,90,10,0.7));color:var(--c-gold);border-color:rgba(245,200,66,0.3);box-shadow:0 1px 0 rgba(255,220,100,0.1) inset,0 -2px 0 rgba(0,0,0,0.5) inset,0 4px 16px rgba(180,140,20,0.15); }
 .btn-gold:hover { background:linear-gradient(135deg,rgba(210,160,25,0.8),rgba(150,110,15,0.8));box-shadow:0 1px 0 rgba(255,220,100,0.15) inset,0 -2px 0 rgba(0,0,0,0.5) inset,0 8px 24px rgba(200,150,20,0.25);transform:translateY(-2px); }
 
-/* ═══════════════════════════════════════════
-   OUTPUT AREA
-═══════════════════════════════════════════ */
+/* OUTPUT */
 .output-area { margin-top:22px;background:rgba(3,8,10,0.85);border:1px solid var(--c-border);border-radius:var(--r-md);padding:18px;max-height:440px;overflow-y:auto;font-size:13px;box-shadow:inset 0 3px 10px rgba(0,0,0,0.4); }
 .output-area:empty { display:none; }
 pre.code-output { margin-top:18px;background:rgba(2,5,7,0.95);border:1px solid var(--c-border);border-radius:var(--r-md);padding:20px;overflow:auto;font-family:var(--f-mono);font-size:11.5px;color:var(--c-text-mid);max-height:440px;line-height:1.65;box-shadow:inset 0 3px 10px rgba(0,0,0,0.4); }
 
-/* ═══════════════════════════════════════════
-   PREDICTION TABLE
-═══════════════════════════════════════════ */
+/* PREDICTION TABLE */
 .prediction-table { width:100%;border-collapse:collapse;margin:12px 0;font-size:12px; }
 .prediction-table th { background:linear-gradient(135deg,rgba(14,243,192,0.15),rgba(8,100,70,0.1));color:var(--c-teal);padding:11px 10px;font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid rgba(14,243,192,0.25);font-family:var(--f-mono); }
 .league-header { background:linear-gradient(135deg,rgba(0,80,55,0.4),rgba(0,40,28,0.6))!important;font-size:11px!important;font-weight:700!important;text-transform:uppercase!important;letter-spacing:3px!important;padding:14px!important;text-align:center;font-family:var(--f-display)!important;color:rgba(255,215,80,0.98)!important;text-shadow:0 1px 0 rgba(0,0,0,0.9),0 2px 4px rgba(0,0,0,0.6)!important; }
@@ -456,28 +401,22 @@ pre.code-output { margin-top:18px;background:rgba(2,5,7,0.95);border:1px solid v
 .prediction-table tr:hover td { background:rgba(14,243,192,0.04);color:var(--c-teal); }
 .score-cell { font-family:var(--f-mono);font-weight:600;color:var(--c-teal)!important; }
 
-/* ═══════════════════════════════════════════
-   MARQUEE
-═══════════════════════════════════════════ */
+/* MARQUEE */
 .marquee-wrap { overflow:hidden;white-space:nowrap;background:linear-gradient(90deg,rgba(14,243,192,0.06) 0%,rgba(14,243,192,0.1) 50%,rgba(14,243,192,0.06) 100%);border:1px solid var(--c-border);border-radius:var(--r-sm);padding:12px 0;font-size:13px;font-weight:600;color:var(--c-teal);margin-bottom:22px;position:relative;box-shadow:0 2px 10px rgba(14,243,192,0.05); }
 .marquee-wrap p { display:inline-block;animation:mq-scroll 24s linear infinite;padding-left:100%;font-family:var(--f-body); }
 @keyframes mq-scroll { 0%{transform:translateX(0);}100%{transform:translateX(-100%);} }
 
-/* ═══════════════════════════════════════════
-   TOAST
-═══════════════════════════════════════════ */
+/* TOAST */
 .toast { position:fixed;bottom:28px;right:28px;background:linear-gradient(135deg,rgba(10,26,35,0.97),rgba(6,16,22,0.98));border:1px solid var(--c-border-hi);border-radius:var(--r-md);padding:14px 18px;display:flex;align-items:center;gap:12px;font-size:13px;font-weight:500;color:var(--c-text);box-shadow:0 1px 0 rgba(14,243,192,0.1) inset,0 -1px 0 rgba(0,0,0,0.6) inset,0 20px 50px rgba(0,0,0,0.6),0 0 0 1px rgba(14,243,192,0.1);transform:translateY(16px) scale(0.97);opacity:0;transition:all 0.28s cubic-bezier(0.2,0,0,1);z-index:9999;backdrop-filter:blur(30px);min-width:240px; }
 .toast.show { transform:translateY(0) scale(1);opacity:1; }
 .toast-icon { color:var(--c-teal);font-size:16px;flex-shrink:0; }
 .toast-dot { width:4px;height:4px;background:var(--c-teal);border-radius:50%;margin-left:auto;flex-shrink:0; }
 
-/* SCROLLBAR */
 ::-webkit-scrollbar { width:5px;height:5px; }
 ::-webkit-scrollbar-track { background:transparent; }
 ::-webkit-scrollbar-thumb { background:rgba(14,243,192,0.15);border-radius:3px; }
 ::-webkit-scrollbar-thumb:hover { background:rgba(14,243,192,0.3); }
 
-/* RESPONSIVE */
 @media(max-width:1100px) { .stat-grid{grid-template-columns:repeat(2,1fr);} .feature-grid{grid-template-columns:1fr 1fr;} }
 @media(max-width:900px) {
   :root{--sidebar-w:76px;}
@@ -506,23 +445,19 @@ pre.code-output { margin-top:18px;background:rgba(2,5,7,0.95);border:1px solid v
   <div class="toast-dot"></div>
 </div>
 
-<!-- ═══ SIDEBAR ═══ -->
 <aside class="sidebar">
   <div class="sb-brand">
     <div class="sb-logo-wrap">
-      <!-- Brand SVG Logo -->
       <div class="sb-logo-icon">
         <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
           <circle cx="13" cy="13" r="12" stroke="rgba(14,243,192,0.5)" stroke-width="1"/>
           <circle cx="13" cy="13" r="8.5" fill="none" stroke="#0ef3c0" stroke-width="1.5"/>
-          <!-- Ball pentagon patches -->
           <polygon points="13,5.5 16.5,8 15.5,12 10.5,12 9.5,8" fill="#0ef3c0" opacity="0.9"/>
           <polygon points="16.5,8 20.5,9.5 21,14 17,16 15.5,12" fill="#056648" opacity="0.85"/>
           <polygon points="9.5,8 10.5,12 9,16 5,14 5.5,9.5" fill="#056648" opacity="0.85"/>
           <polygon points="15.5,12 17,16 14.5,19.5 11.5,19.5 9,16 10.5,12" fill="#0ef3c0" opacity="0.6"/>
           <polygon points="17,16 21,14 20,19.5 16,21 14.5,19.5" fill="#034d35" opacity="0.8"/>
           <polygon points="9,16 11.5,19.5 10,21 6,19.5 5,14" fill="#034d35" opacity="0.8"/>
-          <!-- Shine -->
           <circle cx="10" cy="9.5" r="2" fill="rgba(255,255,255,0.15)"/>
         </svg>
       </div>
@@ -535,23 +470,15 @@ pre.code-output { margin-top:18px;background:rgba(2,5,7,0.95);border:1px solid v
   </div>
   <div class="sb-section-label">// NAVIGASI</div>
   <nav class="sb-nav">
-
-    <!-- 1. Dashboard -->
     <a class="sb-item active" href="#" onclick="goPage('dashboard');return false;">
       <div class="sb-item-icon" style="background:linear-gradient(135deg,rgba(14,243,192,0.18),rgba(8,120,90,0.12));border-color:rgba(14,243,192,0.3);">
         <svg width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <!-- Speedometer / Dashboard gauge -->
           <circle cx="10" cy="10" r="8.5" stroke="#0ef3c0" stroke-width="1.4" fill="none" opacity="0.4"/>
-          <!-- Arc background -->
           <path d="M 3.5 13 A 7.5 7.5 0 0 1 16.5 13" stroke="rgba(14,243,192,0.2)" stroke-width="2" fill="none" stroke-linecap="round"/>
-          <!-- Arc fill - active zone -->
           <path d="M 3.5 13 A 7.5 7.5 0 0 1 12.5 5.8" stroke="#0ef3c0" stroke-width="2" fill="none" stroke-linecap="round"/>
-          <!-- Needle -->
           <line x1="10" y1="10" x2="13.2" y2="6.5" stroke="#f5c842" stroke-width="1.8" stroke-linecap="round"/>
-          <!-- Center dot -->
           <circle cx="10" cy="10" r="1.8" fill="#0ef3c0"/>
           <circle cx="10" cy="10" r="0.8" fill="#020608"/>
-          <!-- Tick marks -->
           <line x1="3.5" y1="13" x2="4.6" y2="12.5" stroke="#0ef3c0" stroke-width="1" opacity="0.6"/>
           <line x1="16.5" y1="13" x2="15.4" y2="12.5" stroke="#0ef3c0" stroke-width="1" opacity="0.6"/>
           <line x1="10" y1="2.5" x2="10" y2="3.8" stroke="#0ef3c0" stroke-width="1" opacity="0.6"/>
@@ -563,21 +490,15 @@ pre.code-output { margin-top:18px;background:rgba(2,5,7,0.95);border:1px solid v
       </div>
       <span class="sb-item-badge badge-new">Live</span>
     </a>
-
-    <!-- 2. Prediksi Bola -->
     <a class="sb-item" href="#" onclick="goPage('prediksi');return false;">
       <div class="sb-item-icon" style="background:linear-gradient(135deg,rgba(249,115,22,0.15),rgba(180,60,10,0.1));border-color:rgba(249,115,22,0.25);">
         <svg width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <!-- Football -->
           <circle cx="10" cy="10" r="8" stroke="#f97316" stroke-width="1.4" fill="rgba(249,115,22,0.08)"/>
-          <!-- Patches -->
           <polygon points="10,3.5 12.8,5.5 12,8.5 8,8.5 7.2,5.5" fill="#f97316" opacity="0.9"/>
           <polygon points="12.8,5.5 16,6.5 16.5,10 13.5,12 12,8.5" fill="rgba(249,115,22,0.5)" opacity="0.8"/>
           <polygon points="7.2,5.5 8,8.5 6.5,12 3.5,10 4,6.5" fill="rgba(249,115,22,0.5)" opacity="0.8"/>
           <polygon points="12,8.5 13.5,12 11.5,15 8.5,15 6.5,12 8,8.5" fill="rgba(249,115,22,0.3)"/>
-          <!-- Shine -->
           <circle cx="7.5" cy="7" r="1.8" fill="rgba(255,255,255,0.12)"/>
-          <!-- Lightning bolt - prediction indicator -->
           <path d="M11.5 1.5 L9 6 L11 6 L8.5 10.5" stroke="#f5c842" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.9"/>
         </svg>
       </div>
@@ -587,20 +508,14 @@ pre.code-output { margin-top:18px;background:rgba(2,5,7,0.95);border:1px solid v
       </div>
       <span class="sb-item-badge badge-hot">Hot</span>
     </a>
-
-    <!-- 3. Pengisian Teks -->
     <a class="sb-item" href="#" onclick="goPage('pengisian');return false;">
       <div class="sb-item-icon" style="background:linear-gradient(135deg,rgba(245,200,66,0.15),rgba(160,120,10,0.1));border-color:rgba(245,200,66,0.25);">
         <svg width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <!-- Document / clipboard -->
           <rect x="4" y="3" width="12" height="15" rx="2" stroke="#f5c842" stroke-width="1.4" fill="rgba(245,200,66,0.06)"/>
-          <!-- Clip top -->
           <rect x="7.5" y="1.5" width="5" height="3" rx="1.2" stroke="#f5c842" stroke-width="1.2" fill="rgba(245,200,66,0.15)"/>
-          <!-- Text lines -->
           <line x1="6.5" y1="8" x2="13.5" y2="8" stroke="#f5c842" stroke-width="1.2" stroke-linecap="round" opacity="0.9"/>
           <line x1="6.5" y1="11" x2="13.5" y2="11" stroke="#f5c842" stroke-width="1.2" stroke-linecap="round" opacity="0.7"/>
           <line x1="6.5" y1="14" x2="10.5" y2="14" stroke="#f5c842" stroke-width="1.2" stroke-linecap="round" opacity="0.5"/>
-          <!-- Pen nib -->
           <path d="M12.5 13 L15 10.5 L16.5 12 L14 14.5 Z" fill="#f5c842" opacity="0.9"/>
           <line x1="14" y1="14.5" x2="13.2" y2="16.2" stroke="#f5c842" stroke-width="1" stroke-linecap="round" opacity="0.7"/>
         </svg>
@@ -610,26 +525,18 @@ pre.code-output { margin-top:18px;background:rgba(2,5,7,0.95);border:1px solid v
         <span class="sb-item-sub">Format jadwal otomatis</span>
       </div>
     </a>
-
-    <!-- 4. Konversi Skor -->
     <a class="sb-item" href="#" onclick="goPage('konversi');return false;">
       <div class="sb-item-icon" style="background:linear-gradient(135deg,rgba(167,139,250,0.15),rgba(100,60,220,0.1));border-color:rgba(167,139,250,0.25);">
         <svg width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <!-- Score pill left -->
           <rect x="1.5" y="7" width="7" height="6" rx="2.5" stroke="#a78bfa" stroke-width="1.4" fill="rgba(167,139,250,0.1)"/>
           <text x="5" y="11.4" text-anchor="middle" font-size="4.5" font-weight="700" fill="#a78bfa" font-family="monospace">2–1</text>
-          <!-- Arrow right -->
           <path d="M10 10 L13 10" stroke="#a78bfa" stroke-width="1.4" stroke-linecap="round"/>
           <path d="M11.8 8.2 L13.8 10 L11.8 11.8" stroke="#a78bfa" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-          <!-- Arrow left (double arrow = convert) -->
           <path d="M10 10 L7.5 10" stroke="#a78bfa" stroke-width="0.8" stroke-linecap="round" opacity="0.4"/>
-          <!-- Score pill right -->
           <rect x="14" y="6" width="5" height="8" rx="2" fill="#a78bfa" opacity="0.15"/>
           <rect x="14" y="6" width="5" height="8" rx="2" stroke="#a78bfa" stroke-width="1.4"/>
-          <!-- Colon dots -->
           <circle cx="16.5" cy="9" r="0.8" fill="#a78bfa"/>
           <circle cx="16.5" cy="11" r="0.8" fill="#a78bfa"/>
-          <!-- Refresh circle suggestion -->
           <path d="M9.5 4.5 Q10 2.5 11.5 3 Q13.5 3.5 13 5.5" stroke="#a78bfa" stroke-width="1" fill="none" stroke-linecap="round" opacity="0.6"/>
           <path d="M13 5.5 L14 4.5 M13 5.5 L12 4.2" stroke="#a78bfa" stroke-width="1" stroke-linecap="round" opacity="0.6"/>
         </svg>
@@ -639,16 +546,13 @@ pre.code-output { margin-top:18px;background:rgba(2,5,7,0.95);border:1px solid v
         <span class="sb-item-sub">– ke : otomatis</span>
       </div>
     </a>
-
   </nav>
   <div class="sb-footer">
     <div class="sb-user">
-      <!-- Avatar dengan SVG Admin icon -->
       <div class="sb-avatar" style="position:relative;">
         <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
           <circle cx="10" cy="7.5" r="3.5" fill="#020608" stroke="rgba(14,243,192,0.7)" stroke-width="1.2"/>
           <path d="M3.5 17.5 C3.5 13.5 6.5 11 10 11 C13.5 11 16.5 13.5 16.5 17.5" stroke="rgba(14,243,192,0.7)" stroke-width="1.3" fill="none" stroke-linecap="round"/>
-          <!-- Crown / admin badge -->
           <path d="M7.5 5.5 L8.5 3.5 L10 5 L11.5 3.5 L12.5 5.5" stroke="#f5c842" stroke-width="1" fill="none" stroke-linejoin="round" opacity="0.8"/>
         </svg>
       </div>
@@ -661,7 +565,6 @@ pre.code-output { margin-top:18px;background:rgba(2,5,7,0.95);border:1px solid v
   </div>
 </aside>
 
-<!-- ═══ CONTENT ═══ -->
 <div class="content">
   <div class="topbar">
     <div class="topbar-left">
@@ -942,9 +845,12 @@ ${tableContent}
 </body>
 </html>`;}
 
-/* ════════════════════════════════════════════════════
-   RED ULTRA LUXURY HTML — v4 FIXED (No Aurora Gap)
-════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════
+   RED HTML — FIXED: Tidak menutupi konten WordPress di atasnya
+   Solusi: Hapus background & fixed overlay dari body/html.
+   Semua styling hanya di dalam .rbox wrapper.
+   Konten WordPress di atas post tetap terlihat.
+═══════════════════════════════════════════════════════════════ */
 function showRedHtml(){
   const raw=document.getElementById('outputTable').innerHTML;
   if(!raw){toast('Generate tabel dulu!');return;}
@@ -966,39 +872,58 @@ return `<!DOCTYPE html>
 <title>Prediksi Bola — Ultra Luxury Red Edition</title>
 <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Cinzel:wght@700;800;900&family=JetBrains+Mono:ital,wght@0,300;0,400;0,600;1,400&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
-/* RESET */
-*{margin:0;padding:0;box-sizing:border-box}
+/* ═══════════════════════════════════════════════════════════
+   PENTING: body dan html TIDAK punya background/fixed overlay
+   Semua styling dikurung di dalam .rbox agar tidak menimpa
+   konten WordPress (header post, title, dsb) di atas konten ini.
+═══════════════════════════════════════════════════════════ */
 
-/* BODY */
-body{
+/* Reset hanya untuk elemen di dalam .rbox */
+.rbox *, .rbox *::before, .rbox *::after {
+  margin:0; padding:0; box-sizing:border-box;
+}
+
+/* WRAPPER UTAMA — tidak pakai fixed, tidak pakai body bg */
+.rbox {
   font-family:'Rajdhani',sans-serif;
-  background:#04000a;
   color:#f5e8d8;
-  min-height:100vh;
-  padding:0 0 60px;
+  max-width:900px;
+  margin:0 auto;
+  padding:0 0 48px;
   position:relative;
-  overflow-x:hidden;
+  overflow:hidden;
 }
 
-/* Deep cinematic background */
-body::before{
-  content:'';position:fixed;inset:0;
+/* Deep cinematic background HANYA di dalam .rbox */
+.rbox::before {
+  content:'';
+  position:absolute; inset:0;
   background:
-    radial-gradient(ellipse 120% 55% at 50% -5%,rgba(220,10,0,0.45) 0%,transparent 55%),
-    radial-gradient(ellipse 80% 50% at 0% 80%,rgba(140,5,0,0.3) 0%,transparent 55%),
-    radial-gradient(ellipse 70% 50% at 100% 50%,rgba(180,8,0,0.22) 0%,transparent 55%),
-    radial-gradient(ellipse 60% 60% at 50% 50%,rgba(80,3,0,0.5) 0%,transparent 65%),
-    linear-gradient(to bottom,rgba(14,0,0,0.85) 0%,rgba(2,0,0,1) 100%);
-  pointer-events:none;z-index:0;
-}
-/* Film grain overlay */
-body::after{
-  content:'';position:fixed;inset:0;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-  opacity:.55;pointer-events:none;z-index:0;
+    radial-gradient(ellipse 120% 55% at 50% 0%,rgba(220,10,0,0.42) 0%,transparent 52%),
+    radial-gradient(ellipse 80% 50% at 0% 80%,rgba(140,5,0,0.28) 0%,transparent 55%),
+    radial-gradient(ellipse 70% 50% at 100% 50%,rgba(180,8,0,0.20) 0%,transparent 55%),
+    radial-gradient(ellipse 60% 60% at 50% 50%,rgba(80,3,0,0.48) 0%,transparent 65%),
+    linear-gradient(to bottom,rgba(14,0,0,0.88) 0%,rgba(4,0,0,0.98) 100%);
+  pointer-events:none;
+  z-index:0;
+  border-radius:28px;
 }
 
-/* RGB LED STRIP ANIMATIONS */
+/* Film grain HANYA di dalam .rbox */
+.rbox::after {
+  content:'';
+  position:absolute; inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  opacity:.45;
+  pointer-events:none;
+  z-index:0;
+  border-radius:28px;
+}
+
+/* Semua child dari .rbox harus di atas pseudoelement */
+.rbox > * { position:relative; z-index:1; }
+
+/* RGB LED ANIMATIONS */
 @keyframes rgb-led{
   0%  {background-position:0% 0%;  box-shadow:0 0 16px 5px rgba(255,0,60,0.9),  0 0 40px rgba(255,0,60,0.4),  0 0 80px rgba(255,0,60,0.15);}
   14% {background-position:14% 0%; box-shadow:0 0 16px 5px rgba(255,100,0,0.9), 0 0 40px rgba(255,100,0,0.4), 0 0 80px rgba(255,100,0,0.15);}
@@ -1030,7 +955,6 @@ body::after{
   opacity:0.9;
   animation:rgb-led 3s linear infinite;
 }
-/* Glow halo reflection below strip */
 .led-bar::before{
   content:'';position:absolute;top:5px;left:5%;right:5%;height:20px;
   background:inherit;filter:blur(18px);opacity:0.4;border-radius:0 0 50% 50%;
@@ -1042,16 +966,13 @@ body::after{
 .led-bar.s4{animation-duration:4.2s;} .led-bar.s4::after,.led-bar.s4::before{animation-duration:4.2s;}
 .led-bar.s5{animation-duration:2.8s;} .led-bar.s5::after,.led-bar.s5::before{animation-duration:2.8s;}
 
-/* WRAP */
-.wrap{max-width:900px;margin:0 auto;position:relative;z-index:1;padding:32px 18px 0;}
-
-/* HEADER CARD — starts at top, no gap */
+/* HEADER CARD */
 .hcard{
   background:linear-gradient(165deg,rgba(38,4,4,0.98) 0%,rgba(24,2,2,0.99) 55%,rgba(14,1,1,1) 100%);
   border:1px solid rgba(240,60,20,0.22);
   border-radius:28px;
   padding:38px 32px 32px;
-  margin-bottom:26px;
+  margin-bottom:22px;
   position:relative;overflow:hidden;
   box-shadow:
     0 1px 0 rgba(255,80,40,0.18) inset,
@@ -1063,7 +984,6 @@ body::after{
     0 40px 90px rgba(0,0,0,0.65),
     0 3px 16px rgba(200,12,0,0.35);
 }
-/* Gloss line below LED */
 .hcard::after{
   content:'';position:absolute;top:5px;left:8%;right:8%;height:1px;
   background:linear-gradient(90deg,transparent,rgba(255,255,255,0.12),transparent);
@@ -1078,16 +998,9 @@ body::after{
   letter-spacing:5px;text-transform:uppercase;
   line-height:1.2;
   background:linear-gradient(180deg,
-    #ffffff 0%,
-    #fff0c0 5%,
-    #ffd700 15%,
-    #ff8c00 28%,
-    #ff4500 40%,
-    #ff8c00 52%,
-    #ffd700 65%,
-    #fff0c0 80%,
-    #ffffff 90%,
-    #ffe080 100%);
+    #ffffff 0%,#fff0c0 5%,#ffd700 15%,#ff8c00 28%,
+    #ff4500 40%,#ff8c00 52%,#ffd700 65%,#fff0c0 80%,
+    #ffffff 90%,#ffe080 100%);
   background-size:100% 200%;
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
   animation:ts 4s ease-in-out infinite alternate;
@@ -1111,7 +1024,7 @@ body::after{
 
 /* DATE LINE */
 .dline{
-  text-align:center;font-family:'JetBrains Mono',monospace;font-size:12.5px;font-weight:400;
+  text-align:center;font-family:'JetBrains Mono',monospace;font-size:12.5px;
   font-style:italic;color:rgba(255,210,140,0.88);letter-spacing:2px;
   position:relative;z-index:6;margin-bottom:24px;
   display:flex;align-items:center;gap:12px;justify-content:center;
@@ -1145,7 +1058,7 @@ body::after{
 
 /* TABLE SECTION WRAP */
 .twrap{
-  position:relative;margin:28px 0;border-radius:26px;overflow:hidden;
+  position:relative;margin:22px 0;border-radius:26px;overflow:hidden;
   background:linear-gradient(170deg,rgba(28,4,3,0.99) 0%,rgba(16,1,1,1) 100%);
   box-shadow:
     0 1px 0 rgba(255,70,30,0.15) inset,
@@ -1157,7 +1070,6 @@ body::after{
     0 60px 100px rgba(0,0,0,0.65),
     0 8px 22px rgba(160,8,0,0.28);
 }
-/* Gloss line below LED */
 .twrap::after{
   content:'';position:absolute;top:5px;left:4%;right:4%;height:1px;
   background:linear-gradient(90deg,transparent,rgba(255,255,255,0.1),transparent);z-index:15;
@@ -1165,8 +1077,6 @@ body::after{
 
 /* TABLE */
 .rtable{width:100%;border-collapse:collapse;font-size:13px;position:relative;}
-
-/* TH */
 .rtable th{
   background:linear-gradient(180deg,rgba(190,22,10,0.97) 0%,rgba(140,10,4,0.99) 50%,rgba(100,4,2,1) 100%);
   padding:16px 14px;
@@ -1195,16 +1105,9 @@ body::after{
   color:transparent!important;
   -webkit-text-fill-color:transparent!important;
   background-image:linear-gradient(180deg,
-    #ffffff 0%,
-    #fff8c0 5%,
-    #ffd700 18%,
-    #ff8c00 32%,
-    #ffcc00 45%,
-    #ff6600 58%,
-    #ffcc00 70%,
-    #ffd700 82%,
-    #fffde0 92%,
-    #ffd700 100%)!important;
+    #ffffff 0%,#fff8c0 5%,#ffd700 18%,#ff8c00 32%,
+    #ffcc00 45%,#ff6600 58%,#ffcc00 70%,#ffd700 82%,
+    #fffde0 92%,#ffd700 100%)!important;
   -webkit-background-clip:text!important;background-clip:text!important;
   text-shadow:none!important;
   filter:
@@ -1244,11 +1147,8 @@ body::after{
 /* SCORE */
 .rscore{
   font-family:'JetBrains Mono',monospace!important;
-  font-weight:700!important;
-  font-style:italic!important;
-  font-size:16px!important;
-  color:transparent!important;
-  -webkit-text-fill-color:transparent!important;
+  font-weight:700!important;font-style:italic!important;font-size:16px!important;
+  color:transparent!important;-webkit-text-fill-color:transparent!important;
   background-image:linear-gradient(180deg,#ffffff 0%,#ffdd88 15%,#ff8c00 35%,#ff4500 50%,#ff8c00 65%,#ffdd88 85%,#ffffff 100%)!important;
   -webkit-background-clip:text!important;background-clip:text!important;
   text-shadow:none!important;
@@ -1267,17 +1167,16 @@ body::after{
   box-shadow:0 1px 0 rgba(255,70,30,0.12) inset,0 -4px 0 rgba(0,0,0,0.85) inset,0 10px 30px rgba(0,0,0,0.75);
 }
 .fcard::after{content:'';position:absolute;top:5px;left:6%;right:6%;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.1),transparent);}
-.ftxt{font-family:'JetBrains Mono',monospace;font-size:10.5px;font-weight:400;font-style:italic;color:rgba(255,140,60,0.32);letter-spacing:2.5px;text-transform:uppercase;padding-top:10px;text-shadow:0 1px 0 rgba(0,0,0,0.95),0 0 10px rgba(255,70,15,0.1);}
+.ftxt{font-family:'JetBrains Mono',monospace;font-size:10.5px;font-style:italic;color:rgba(255,140,60,0.32);letter-spacing:2.5px;text-transform:uppercase;padding-top:10px;text-shadow:0 1px 0 rgba(0,0,0,0.95);}
 
 /* RESPONSIVE */
 @media(max-width:600px){
-  body{padding:0 0 36px}
-  .wrap{padding:18px 14px 0}
+  .rbox{padding:0 0 28px}
   .stitle-main{font-size:18px;letter-spacing:2.5px}
   .stitle-ball{font-size:24px}
   .hcard{padding:28px 18px 24px;border-radius:20px}
   .mq-inner p{font-size:11.5px;letter-spacing:.8px}
-  .twrap{border-radius:18px;margin:20px 0}
+  .twrap{border-radius:18px;margin:16px 0}
   .rtable{font-size:11.5px}
   .rtable th,.rtable td{padding:11px 9px}
   .rtable th{font-size:8.5px;letter-spacing:1.5px}
@@ -1288,9 +1187,13 @@ body::after{
 </head>
 <body>
 
-<div class="wrap">
+<!-- ═══════════════════════════════════════════════════════
+     SEMUA KONTEN ADA DI DALAM .rbox
+     body TIDAK PUNYA background agar konten WordPress
+     di atas post (featured image, title, meta) tetap terlihat.
+═══════════════════════════════════════════════════════ -->
+<div class="rbox">
 
-  <!-- HEADER CARD — directly at top, clean, no aurora gap -->
   <div class="hcard">
     <div class="led-bar s2"></div>
     <div class="stitle">
@@ -1311,10 +1214,8 @@ body::after{
     </div>
   </div>
 
-  <!-- TABLES -->
   ${tableContent.replace(/<table /g,'<div class="twrap"><div class="led-bar s3"></div><table ').replace(/<\/table>/g,'</table></div>')}
 
-  <!-- FOOTER -->
   <div class="fcard">
     <div class="led-bar s4"></div>
     <div class="ftxt">© ${yr} Angkabet &mdash; All Rights Reserved &mdash; Premium Football Prediction</div>
